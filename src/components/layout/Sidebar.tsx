@@ -90,7 +90,7 @@ export function AppSidebar() {
   return (
     <ShadcnSidebar>
       <div className="p-4 flex items-center justify-center">
-        <h1 className="text-xl font-bold text-white">AI DataFlow</h1>
+        <Link to="/" className="text-xl font-bold text-white">AI DataFlow</Link>
       </div>
       <SidebarContent>
         <SidebarGroup>
