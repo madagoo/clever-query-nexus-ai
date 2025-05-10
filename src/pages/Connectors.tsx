@@ -1,12 +1,11 @@
-
 import Header from "@/components/layout/Header";
 import SidebarWrapper from "@/components/layout/Sidebar";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Database, HardDrive, FileType2, Server } from "lucide-react";
+import { Database, HardDrive, FileType2, Server, AlertCircle } from "lucide-react";
 import { 
   Dialog,
   DialogContent,
@@ -38,43 +37,154 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 
-// Schémas pour les différents types de connexions
-const databaseConnectorSchema = z.object({
-  name: z.string().min(3, "Le nom doit avoir au moins 3 caractères"),
-  type: z.enum(["postgresql", "mysql", "mongodb", "elasticsearch", "oracle", "sqlserver"]),
-  host: z.string().min(1, "L'hôte est requis"),
-  port: z.string().regex(/^\d+$/, "Le port doit être un nombre"),
-  database: z.string().min(1, "Le nom de la base de données est requis"),
-  username: z.string().min(1, "Le nom d'utilisateur est requis"),
-  password: z.string().optional(),
-  ssl: z.boolean().default(true),
-});
+// Configuration des champs spécifiques par type de base de données
+const databaseSpecificFields = {
+  postgresql: {
+    defaultPort: "5432",
+    additionalFields: [
+      { name: "schema", label: "Schéma", placeholder: "public", required: true }
+    ]
+  },
+  mysql: {
+    defaultPort: "3306",
+    additionalFields: []
+  },
+  mongodb: {
+    defaultPort: "27017",
+    additionalFields: [
+      { name: "authSource", label: "Source d'authentification", placeholder: "admin", required: false }
+    ]
+  },
+  elasticsearch: {
+    defaultPort: "9200",
+    additionalFields: [
+      { name: "index", label: "Index par défaut", placeholder: "mon_index", required: false }
+    ]
+  },
+  oracle: {
+    defaultPort: "1521",
+    additionalFields: [
+      { name: "serviceName", label: "Nom du service", placeholder: "ORCL", required: true }
+    ]
+  },
+  sqlserver: {
+    defaultPort: "1433",
+    additionalFields: [
+      { name: "instance", label: "Nom de l'instance", placeholder: "MSSQLSERVER", required: false }
+    ]
+  }
+};
 
-const fileConnectorSchema = z.object({
+// Configuration des champs spécifiques par type de connexion fichier
+const fileSpecificFields = {
+  sftp: {
+    defaultPort: "22",
+    additionalFields: [
+      { name: "keyfile", label: "Fichier de clé privée", placeholder: "/chemin/vers/cle.pem", required: false }
+    ]
+  },
+  ftp: {
+    defaultPort: "21",
+    additionalFields: [
+      { name: "passive", label: "Mode passif", type: "checkbox", required: false }
+    ]
+  },
+  s3: {
+    defaultPort: "",
+    additionalFields: [
+      { name: "bucket", label: "Nom du bucket", placeholder: "mon-bucket", required: true },
+      { name: "region", label: "Région AWS", placeholder: "eu-west-3", required: true },
+      { name: "accessKey", label: "Clé d'accès", placeholder: "AKIAXXXXXXXXXXXXXXXX", required: true },
+      { name: "secretKey", label: "Clé secrète", placeholder: "XXXXXXXXXXXXXXXXXXXXXXXX", type: "password", required: true }
+    ]
+  },
+  gcs: {
+    defaultPort: "",
+    additionalFields: [
+      { name: "bucket", label: "Nom du bucket", placeholder: "mon-bucket", required: true },
+      { name: "projectId", label: "ID du projet", placeholder: "mon-projet-123456", required: true }
+    ]
+  },
+  azure: {
+    defaultPort: "",
+    additionalFields: [
+      { name: "container", label: "Nom du conteneur", placeholder: "mon-conteneur", required: true },
+      { name: "accountName", label: "Nom du compte", placeholder: "moncompte", required: true },
+      { name: "accountKey", label: "Clé du compte", placeholder: "XXXXXXXXXXXXXXXXXXXXXXXX", type: "password", required: true }
+    ]
+  },
+  smb: {
+    defaultPort: "445",
+    additionalFields: [
+      { name: "domain", label: "Domaine", placeholder: "WORKGROUP", required: false },
+      { name: "share", label: "Nom du partage", placeholder: "documents", required: true }
+    ]
+  },
+  nfs: {
+    defaultPort: "2049",
+    additionalFields: [
+      { name: "mountOptions", label: "Options de montage", placeholder: "rw,sync", required: false }
+    ]
+  }
+};
+
+// Schéma de base pour les connecteurs
+const baseConnectorSchema = z.object({
   name: z.string().min(3, "Le nom doit avoir au moins 3 caractères"),
-  type: z.enum(["sftp", "ftp", "s3", "gcs", "azure", "smb", "nfs"]),
+  type: z.string(),
   host: z.string().min(1, "L'hôte est requis"),
   port: z.string().optional(),
   username: z.string().optional(),
   password: z.string().optional(),
-  path: z.string().min(1, "Le chemin est requis"),
   ssl: z.boolean().default(true),
 });
 
-type DatabaseFormValues = z.infer<typeof databaseConnectorSchema>;
-type FileFormValues = z.infer<typeof fileConnectorSchema>;
+// Fonction pour construire le schéma dynamique en fonction du type
+const buildDynamicSchema = (type, specificFields) => {
+  let schema = baseConnectorSchema;
+  
+  if (type === 'database') {
+    schema = schema.extend({
+      database: z.string().min(1, "Le nom de la base de données est requis"),
+    });
+  } else if (type === 'file') {
+    schema = schema.extend({
+      path: z.string().min(1, "Le chemin est requis"),
+    });
+  }
+
+  // Ajouter des champs spécifiques dynamiquement si nécessaire
+  if (specificFields && specificFields.additionalFields) {
+    const additionalSchemaFields = {};
+    specificFields.additionalFields.forEach(field => {
+      if (field.type === 'checkbox') {
+        additionalSchemaFields[field.name] = z.boolean().default(false);
+      } else if (field.required) {
+        additionalSchemaFields[field.name] = z.string().min(1, `${field.label} est requis`);
+      } else {
+        additionalSchemaFields[field.name] = z.string().optional();
+      }
+    });
+    schema = schema.extend(additionalSchemaFields);
+  }
+
+  return schema;
+};
 
 const Connectors = () => {
   const [isConnectDialogOpen, setIsConnectDialogOpen] = useState(false);
   const [connectionType, setConnectionType] = useState<"database" | "file">("database");
+  const [selectedDbType, setSelectedDbType] = useState("postgresql");
+  const [selectedFileType, setSelectedFileType] = useState("sftp");
+  const [dynamicSchema, setDynamicSchema] = useState(buildDynamicSchema('database', databaseSpecificFields.postgresql));
   
-  const databaseForm = useForm<DatabaseFormValues>({
-    resolver: zodResolver(databaseConnectorSchema),
+  const form = useForm({
+    resolver: zodResolver(dynamicSchema),
     defaultValues: {
       name: "",
       type: "postgresql",
       host: "",
-      port: "",
+      port: databaseSpecificFields.postgresql.defaultPort,
       database: "",
       username: "",
       password: "",
@@ -82,22 +192,62 @@ const Connectors = () => {
     },
   });
 
-  const fileForm = useForm<FileFormValues>({
-    resolver: zodResolver(fileConnectorSchema),
-    defaultValues: {
+  // Mettre à jour le schéma et les valeurs par défaut quand le type change
+  useEffect(() => {
+    let specificFields;
+    let defaultPort = "";
+    let defaultValues: any = {
       name: "",
-      type: "sftp",
       host: "",
-      port: "",
       username: "",
       password: "",
-      path: "",
       ssl: true,
-    },
-  });
+    };
+    
+    if (connectionType === "database") {
+      specificFields = databaseSpecificFields[selectedDbType];
+      defaultPort = specificFields.defaultPort;
+      defaultValues = {
+        ...defaultValues,
+        type: selectedDbType,
+        port: defaultPort,
+        database: "",
+      };
+      
+      // Ajouter les valeurs par défaut pour les champs spécifiques
+      if (specificFields.additionalFields) {
+        specificFields.additionalFields.forEach(field => {
+          defaultValues[field.name] = field.type === 'checkbox' ? false : "";
+        });
+      }
+    } else {
+      specificFields = fileSpecificFields[selectedFileType];
+      defaultPort = specificFields.defaultPort;
+      defaultValues = {
+        ...defaultValues,
+        type: selectedFileType,
+        port: defaultPort,
+        path: "",
+      };
+      
+      // Ajouter les valeurs par défaut pour les champs spécifiques
+      if (specificFields.additionalFields) {
+        specificFields.additionalFields.forEach(field => {
+          defaultValues[field.name] = field.type === 'checkbox' ? false : "";
+        });
+      }
+    }
+    
+    const newSchema = buildDynamicSchema(connectionType, specificFields);
+    setDynamicSchema(newSchema);
+    
+    // Reset le formulaire avec les nouvelles valeurs par défaut
+    form.reset(defaultValues);
+    
+  }, [connectionType, selectedDbType, selectedFileType, form]);
 
-  const onDatabaseSubmit = (data: DatabaseFormValues) => {
-    console.log("Connexion à la base de données:", data);
+  const onSubmit = (data) => {
+    console.log("Connexion:", data);
     toast.success(`Connexion à ${data.name} en cours...`);
     setIsConnectDialogOpen(false);
     
@@ -107,15 +257,47 @@ const Connectors = () => {
     }, 2000);
   };
 
-  const onFileSubmit = (data: FileFormValues) => {
-    console.log("Connexion au répertoire:", data);
-    toast.success(`Connexion à ${data.name} en cours...`);
-    setIsConnectDialogOpen(false);
-    
-    // Simuler un délai pour la connexion
-    setTimeout(() => {
-      toast.success(`Connexion à ${data.name} établie avec succès!`);
-    }, 2000);
+  // Fonction pour générer les champs spécifiques en fonction du type sélectionné
+  const renderSpecificFields = () => {
+    const specificFields = connectionType === "database" 
+      ? databaseSpecificFields[selectedDbType]?.additionalFields || []
+      : fileSpecificFields[selectedFileType]?.additionalFields || [];
+      
+    return specificFields.map((field) => (
+      <FormField
+        key={field.name}
+        control={form.control}
+        name={field.name}
+        render={({ field: formField }) => (
+          <FormItem>
+            <FormLabel>{field.label}</FormLabel>
+            <FormControl>
+              {field.type === 'checkbox' ? (
+                <div className="flex items-center space-x-2">
+                  <input
+                    type="checkbox"
+                    checked={formField.value}
+                    onChange={formField.onChange}
+                    id={field.name}
+                    className="h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-600"
+                  />
+                  <label htmlFor={field.name} className="text-sm text-gray-700">
+                    Activer
+                  </label>
+                </div>
+              ) : (
+                <Input
+                  type={field.type || "text"}
+                  placeholder={field.placeholder}
+                  {...formField}
+                />
+              )}
+            </FormControl>
+            <FormMessage />
+          </FormItem>
+        )}
+      />
+    ));
   };
 
   return (
@@ -152,10 +334,10 @@ const Connectors = () => {
                   </TabsList>
                   
                   <TabsContent value="database" className="mt-4">
-                    <Form {...databaseForm}>
-                      <form onSubmit={databaseForm.handleSubmit(onDatabaseSubmit)} className="space-y-4">
+                    <Form {...form}>
+                      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
                         <FormField
-                          control={databaseForm.control}
+                          control={form.control}
                           name="name"
                           render={({ field }) => (
                             <FormItem>
@@ -169,12 +351,18 @@ const Connectors = () => {
                         />
 
                         <FormField
-                          control={databaseForm.control}
+                          control={form.control}
                           name="type"
                           render={({ field }) => (
                             <FormItem>
                               <FormLabel>Type de base de données</FormLabel>
-                              <Select onValueChange={field.onChange} defaultValue={field.value}>
+                              <Select 
+                                onValueChange={(value) => {
+                                  field.onChange(value);
+                                  setSelectedDbType(value);
+                                }} 
+                                defaultValue={field.value}
+                              >
                                 <FormControl>
                                   <SelectTrigger>
                                     <SelectValue placeholder="Sélectionnez un type" />
@@ -196,7 +384,7 @@ const Connectors = () => {
 
                         <div className="grid grid-cols-2 gap-4">
                           <FormField
-                            control={databaseForm.control}
+                            control={form.control}
                             name="host"
                             render={({ field }) => (
                               <FormItem>
@@ -210,13 +398,13 @@ const Connectors = () => {
                           />
 
                           <FormField
-                            control={databaseForm.control}
+                            control={form.control}
                             name="port"
                             render={({ field }) => (
                               <FormItem>
                                 <FormLabel>Port</FormLabel>
                                 <FormControl>
-                                  <Input placeholder="5432" {...field} />
+                                  <Input placeholder={databaseSpecificFields[selectedDbType]?.defaultPort || ""} {...field} />
                                 </FormControl>
                                 <FormMessage />
                               </FormItem>
@@ -225,7 +413,7 @@ const Connectors = () => {
                         </div>
 
                         <FormField
-                          control={databaseForm.control}
+                          control={form.control}
                           name="database"
                           render={({ field }) => (
                             <FormItem>
@@ -238,9 +426,12 @@ const Connectors = () => {
                           )}
                         />
 
+                        {/* Champs spécifiques au type de base de données */}
+                        {renderSpecificFields()}
+
                         <div className="grid grid-cols-2 gap-4">
                           <FormField
-                            control={databaseForm.control}
+                            control={form.control}
                             name="username"
                             render={({ field }) => (
                               <FormItem>
@@ -254,7 +445,7 @@ const Connectors = () => {
                           />
 
                           <FormField
-                            control={databaseForm.control}
+                            control={form.control}
                             name="password"
                             render={({ field }) => (
                               <FormItem>
@@ -269,7 +460,7 @@ const Connectors = () => {
                         </div>
 
                         <FormField
-                          control={databaseForm.control}
+                          control={form.control}
                           name="ssl"
                           render={({ field }) => (
                             <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4">
@@ -299,10 +490,10 @@ const Connectors = () => {
                   </TabsContent>
 
                   <TabsContent value="file" className="mt-4">
-                    <Form {...fileForm}>
-                      <form onSubmit={fileForm.handleSubmit(onFileSubmit)} className="space-y-4">
+                    <Form {...form}>
+                      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
                         <FormField
-                          control={fileForm.control}
+                          control={form.control}
                           name="name"
                           render={({ field }) => (
                             <FormItem>
@@ -316,12 +507,18 @@ const Connectors = () => {
                         />
 
                         <FormField
-                          control={fileForm.control}
+                          control={form.control}
                           name="type"
                           render={({ field }) => (
                             <FormItem>
                               <FormLabel>Type de connexion</FormLabel>
-                              <Select onValueChange={field.onChange} defaultValue={field.value}>
+                              <Select 
+                                onValueChange={(value) => {
+                                  field.onChange(value);
+                                  setSelectedFileType(value);
+                                }} 
+                                defaultValue={field.value}
+                              >
                                 <FormControl>
                                   <SelectTrigger>
                                     <SelectValue placeholder="Sélectionnez un type" />
@@ -344,7 +541,7 @@ const Connectors = () => {
 
                         <div className="grid grid-cols-2 gap-4">
                           <FormField
-                            control={fileForm.control}
+                            control={form.control}
                             name="host"
                             render={({ field }) => (
                               <FormItem>
@@ -358,13 +555,13 @@ const Connectors = () => {
                           />
 
                           <FormField
-                            control={fileForm.control}
+                            control={form.control}
                             name="port"
                             render={({ field }) => (
                               <FormItem>
                                 <FormLabel>Port</FormLabel>
                                 <FormControl>
-                                  <Input placeholder="22" {...field} />
+                                  <Input placeholder={fileSpecificFields[selectedFileType]?.defaultPort || ""} {...field} />
                                 </FormControl>
                                 <FormMessage />
                               </FormItem>
@@ -372,9 +569,12 @@ const Connectors = () => {
                           />
                         </div>
 
+                        {/* Champs spécifiques au type de connexion fichier */}
+                        {renderSpecificFields()}
+
                         <div className="grid grid-cols-2 gap-4">
                           <FormField
-                            control={fileForm.control}
+                            control={form.control}
                             name="username"
                             render={({ field }) => (
                               <FormItem>
@@ -388,7 +588,7 @@ const Connectors = () => {
                           />
 
                           <FormField
-                            control={fileForm.control}
+                            control={form.control}
                             name="password"
                             render={({ field }) => (
                               <FormItem>
@@ -403,7 +603,7 @@ const Connectors = () => {
                         </div>
 
                         <FormField
-                          control={fileForm.control}
+                          control={form.control}
                           name="path"
                           render={({ field }) => (
                             <FormItem>
@@ -417,7 +617,7 @@ const Connectors = () => {
                         />
 
                         <FormField
-                          control={fileForm.control}
+                          control={form.control}
                           name="ssl"
                           render={({ field }) => (
                             <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4">
@@ -678,7 +878,7 @@ const Connectors = () => {
                 ))}
               </div>
             </TabsContent>
-
+            
             <TabsContent value="database" className="mt-0">
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                 {[
