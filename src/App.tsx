@@ -18,6 +18,8 @@ import Analytics from "./pages/Analytics";
 import Terms from "./pages/Terms";
 import Privacy from "./pages/Privacy";
 import Settings from "./pages/Settings";
+import PromptAnalyzer from "./pages/PromptAnalyzer";
+import AnalysisResults from "./pages/AnalysisResults";
 
 const queryClient = new QueryClient();
 
@@ -41,6 +43,8 @@ const App = () => (
           <Route path="/terms" element={<Terms />} />
           <Route path="/privacy" element={<Privacy />} />
           <Route path="/settings" element={<Settings />} />
+          <Route path="/prompt-analyzer" element={<PromptAnalyzer />} />
+          <Route path="/analysis-results" element={<AnalysisResults />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>
