@@ -404,37 +404,37 @@ const Connectors = () => {
   };
 
   return (
-    <SidebarWrapper>
-      <div className="flex flex-col min-h-screen">
-        <Header title="Connecteurs" />
-        <div className="flex-1 p-6">
-          <div className="flex justify-between items-center mb-6">
-            <div>
-              <h1 className="text-2xl font-bold tracking-tight">Gestionnaire de Connecteurs</h1>
-              <p className="text-muted-foreground">
-                Connectez-vous à des bases de données ou des répertoires de fichiers distants
-              </p>
-            </div>
-            <Dialog open={isConnectDialogOpen} onOpenChange={setIsConnectDialogOpen}>
-              <DialogTrigger asChild>
-                <Button>
-                  <Server className="h-4 w-4 mr-2" />
-                  Nouvelle Connexion
-                </Button>
-              </DialogTrigger>
-              <DialogContent className="sm:max-w-[525px]">
-                <DialogHeader>
-                  <DialogTitle>Ajouter une nouvelle connexion</DialogTitle>
-                  <DialogDescription>
-                    Configurez les détails de votre nouvelle connexion
-                  </DialogDescription>
-                </DialogHeader>
+    <div className="flex flex-col min-h-screen">
+      <Header title="Connecteurs" />
+      <div className="flex-1 p-6">
+        <div className="flex justify-between items-center mb-6">
+          <div>
+            <h1 className="text-2xl font-bold tracking-tight">Gestionnaire de Connecteurs</h1>
+            <p className="text-muted-foreground">
+              Connectez-vous à des bases de données ou des répertoires de fichiers distants
+            </p>
+          </div>
+          <Dialog open={isConnectDialogOpen} onOpenChange={setIsConnectDialogOpen}>
+            <DialogTrigger asChild>
+              <Button>
+                <Server className="h-4 w-4 mr-2" />
+                Nouvelle Connexion
+              </Button>
+            </DialogTrigger>
+            <DialogContent className="sm:max-w-[525px]">
+              <DialogHeader>
+                <DialogTitle>Ajouter une nouvelle connexion</DialogTitle>
+                <DialogDescription>
+                  Configurez les détails de votre nouvelle connexion
+                </DialogDescription>
+              </DialogHeader>
 
-                <Tabs defaultValue="database" className="mt-4" onValueChange={(value) => setConnectionType(value as "database" | "file")}>
-                  <TabsList className="grid w-full grid-cols-2">
-                    <TabsTrigger value="database">Base de données</TabsTrigger>
-                    <TabsTrigger value="file">Fichiers</TabsTrigger>
-                  </TabsList>
+              <Tabs defaultValue="database" className="mt-4" onValueChange={(value) => setConnectionType(value as "database" | "file")}>
+                <TabsList className="grid w-full grid-cols-2">
+                  <TabsTrigger value="database">Base de données</TabsTrigger>
+                  <TabsTrigger value="file">Fichiers</TabsTrigger>
+                </TabsList>
+                
                   
                   <TabsContent value="database" className="mt-4">
                     <Form {...databaseForm}>
@@ -941,4 +941,4 @@ const Connectors = () => {
                       </div>
                     </CardHeader>
                     <CardContent>
-                      <
+                      <div className="flex
