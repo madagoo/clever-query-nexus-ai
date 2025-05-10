@@ -1,4 +1,3 @@
-
 import { Link } from "react-router-dom";
 import { 
   SidebarProvider, 
@@ -20,7 +19,8 @@ import {
   BarChart4,
   Settings,
   LogIn,
-  UserPlus
+  UserPlus,
+  Server
 } from "lucide-react";
 
 const menuItems = [
@@ -48,6 +48,11 @@ const menuItems = [
     title: "Connected Sources",
     icon: FileText,
     path: "/sources"
+  },
+  {
+    title: "Data Connectors",
+    icon: Server,
+    path: "/connectors"
   },
   {
     title: "Analytics",

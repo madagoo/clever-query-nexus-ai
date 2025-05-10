@@ -9,6 +9,7 @@ import Agents from "./pages/Agents";
 import Workflows from "./pages/Workflows";
 import Storage from "./pages/Storage";
 import Sources from "./pages/Sources";
+import Connectors from "./pages/Connectors";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
 import ForgotPassword from "./pages/ForgotPassword";
@@ -32,6 +33,7 @@ const App = () => (
           <Route path="/workflows" element={<Workflows />} />
           <Route path="/storage" element={<Storage />} />
           <Route path="/sources" element={<Sources />} />
+          <Route path="/connectors" element={<Connectors />} />
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
           <Route path="/forgot-password" element={<ForgotPassword />} />
