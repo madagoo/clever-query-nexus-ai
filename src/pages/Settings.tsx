@@ -32,10 +32,17 @@ const notificationsFormSchema = z.object({
   marketingEmails: z.boolean().default(false),
 });
 
+// Define the session timeout type to be more precise
+const SessionTimeoutType = z.enum(["30mins", "1hour", "4hours", "1day", "1week"]);
+type SessionTimeoutType = z.infer<typeof SessionTimeoutType>;
+
 const securityFormSchema = z.object({
   twoFactorAuth: z.boolean().default(false),
-  sessionTimeout: z.enum(["30mins", "1hour", "4hours", "1day", "1week"]).default("4hours"),
+  sessionTimeout: SessionTimeoutType.default("4hours"),
 });
+
+// Define the type based on the schema for type safety
+type SecurityFormValues = z.infer<typeof securityFormSchema>;
 
 export default function Settings() {
   const [currentTab, setCurrentTab] = useState("profil");
@@ -58,7 +65,7 @@ export default function Settings() {
     },
   });
 
-  const securityForm = useForm({
+  const securityForm = useForm<SecurityFormValues>({
     resolver: zodResolver(securityFormSchema),
     defaultValues: {
       twoFactorAuth: false,
@@ -76,7 +83,7 @@ export default function Settings() {
     console.log(data);
   }
 
-  function onSecuritySubmit(data: z.infer<typeof securityFormSchema>) {
+  function onSecuritySubmit(data: SecurityFormValues) {
     toast.success("Paramètres de sécurité mis à jour");
     console.log(data);
   }
