@@ -1,3 +1,4 @@
+
 import { Link } from "react-router-dom";
 import { 
   SidebarProvider, 
@@ -25,12 +26,12 @@ import {
 
 const menuItems = [
   {
-    title: "Dashboard",
+    title: "Tableau de bord",
     icon: LayoutDashboard,
     path: "/"
   },
   {
-    title: "AI Agents",
+    title: "Agents IA",
     icon: Brain,
     path: "/agents"
   },
@@ -40,27 +41,27 @@ const menuItems = [
     path: "/workflows"
   },
   {
-    title: "Data Storage",
+    title: "Stockage de données",
     icon: Database,
     path: "/storage"
   },
   {
-    title: "Connected Sources",
+    title: "Sources connectées",
     icon: FileText,
     path: "/sources"
   },
   {
-    title: "Data Connectors",
+    title: "Connecteurs de données",
     icon: Server,
     path: "/connectors"
   },
   {
-    title: "Analytics",
+    title: "Analytique",
     icon: BarChart4,
     path: "/analytics"
   },
   {
-    title: "Settings",
+    title: "Paramètres",
     icon: Settings,
     path: "/settings"
   }
