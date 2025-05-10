@@ -18,7 +18,9 @@ import {
   Database, 
   FileText,
   BarChart4,
-  Settings
+  Settings,
+  LogIn,
+  UserPlus
 } from "lucide-react";
 
 const menuItems = [
@@ -59,6 +61,19 @@ const menuItems = [
   }
 ];
 
+const authItems = [
+  {
+    title: "Se connecter",
+    icon: LogIn,
+    path: "/login"
+  },
+  {
+    title: "S'inscrire",
+    icon: UserPlus,
+    path: "/register"
+  }
+];
+
 export function AppSidebar() {
   return (
     <ShadcnSidebar>
@@ -71,6 +86,24 @@ export function AppSidebar() {
           <SidebarGroupContent>
             <SidebarMenu>
               {menuItems.map((item) => (
+                <SidebarMenuItem key={item.title}>
+                  <SidebarMenuButton asChild>
+                    <Link to={item.path} className="flex items-center gap-3">
+                      <item.icon size={20} />
+                      <span>{item.title}</span>
+                    </Link>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+              ))}
+            </SidebarMenu>
+          </SidebarGroupContent>
+        </SidebarGroup>
+        
+        <SidebarGroup className="mt-4">
+          <SidebarGroupLabel>Authentification</SidebarGroupLabel>
+          <SidebarGroupContent>
+            <SidebarMenu>
+              {authItems.map((item) => (
                 <SidebarMenuItem key={item.title}>
                   <SidebarMenuButton asChild>
                     <Link to={item.path} className="flex items-center gap-3">
