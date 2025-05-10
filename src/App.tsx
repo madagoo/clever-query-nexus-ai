@@ -22,6 +22,7 @@ import Settings from "./pages/Settings";
 import PromptAnalyzer from "./pages/PromptAnalyzer";
 import AnalysisResults from "./pages/AnalysisResults";
 import { AuthProvider, useAuth } from "./contexts/AuthContext";
+import { SidebarProvider } from "./components/ui/sidebar";
 
 const queryClient = new QueryClient();
 
@@ -59,7 +60,7 @@ const RoleBasedRedirect = () => {
     return <Navigate to="/login" />;
   }
   
-  return userRole === 'admin' ? <Navigate to="/" /> : <Navigate to="/prompt-analyzer" />;
+  return userRole === 'admin' ? <Navigate to="/dashboard" /> : <Navigate to="/prompt-analyzer" />;
 };
 
 const AppRoutes = () => {
@@ -98,11 +99,13 @@ const App = () => (
   <QueryClientProvider client={queryClient}>
     <TooltipProvider>
       <AuthProvider>
-        <Toaster />
-        <Sonner />
-        <BrowserRouter>
-          <AppRoutes />
-        </BrowserRouter>
+        <SidebarProvider>
+          <Toaster />
+          <Sonner />
+          <BrowserRouter>
+            <AppRoutes />
+          </BrowserRouter>
+        </SidebarProvider>
       </AuthProvider>
     </TooltipProvider>
   </QueryClientProvider>

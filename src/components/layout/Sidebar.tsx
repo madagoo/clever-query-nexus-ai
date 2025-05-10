@@ -1,7 +1,6 @@
 
 import { Link } from "react-router-dom";
 import { 
-  SidebarProvider, 
   Sidebar as ShadcnSidebar,
   SidebarContent,
   SidebarGroup,
@@ -30,7 +29,7 @@ const menuItems = [
   {
     title: "Tableau de bord",
     icon: LayoutDashboard,
-    path: "/"
+    path: "/dashboard"
   },
   {
     title: "Agents IA",
@@ -151,12 +150,10 @@ export default function SidebarWrapper({ children }: { children: React.ReactNode
   // Si l'utilisateur est admin, afficher avec la sidebar
   if (isAuthenticated && userRole === 'admin') {
     return (
-      <SidebarProvider>
-        <div className="min-h-screen flex w-full">
-          <AppSidebar />
-          <main className="flex-1">{children}</main>
-        </div>
-      </SidebarProvider>
+      <div className="min-h-screen flex w-full">
+        <AppSidebar />
+        <main className="flex-1">{children}</main>
+      </div>
     );
   }
   
