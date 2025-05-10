@@ -1,4 +1,3 @@
-
 import Header from "@/components/layout/Header";
 import SidebarWrapper from "@/components/layout/Sidebar";
 import { useState, useEffect } from "react";
@@ -154,72 +153,64 @@ type FileFormValues = {
   [key: string]: any; // Pour les champs dynamiques
 };
 
-// Schéma de base pour les connecteurs de base de données
-const databaseConnectorSchema = z.object({
-  name: z.string().min(3, "Le nom doit avoir au moins 3 caractères"),
-  type: z.string(),
-  host: z.string().min(1, "L'hôte est requis"),
-  port: z.string().optional(),
-  database: z.string().min(1, "Le nom de la base de données est requis"),
-  username: z.string().optional(),
-  password: z.string().optional(),
-  ssl: z.boolean().default(true),
-}) as z.ZodType<DatabaseFormValues>;
-
-// Schéma de base pour les connecteurs de fichiers
-const fileConnectorSchema = z.object({
-  name: z.string().min(3, "Le nom doit avoir au moins 3 caractères"),
-  type: z.string(),
-  host: z.string().min(1, "L'hôte est requis"),
-  port: z.string().optional(),
-  path: z.string().min(1, "Le chemin est requis"),
-  username: z.string().optional(),
-  password: z.string().optional(),
-  ssl: z.boolean().default(true),
-}) as z.ZodType<FileFormValues>;
-
 // Fonction pour construire le schéma dynamique en fonction du type
 const buildDynamicDatabaseSchema = (specificFields: any) => {
-  let schema = databaseConnectorSchema;
+  // Créer un objet de schéma de base
+  const baseSchema = {
+    name: z.string().min(3, "Le nom doit avoir au moins 3 caractères"),
+    type: z.string(),
+    host: z.string().min(1, "L'hôte est requis"),
+    port: z.string().optional(),
+    database: z.string().min(1, "Le nom de la base de données est requis"),
+    username: z.string().optional(),
+    password: z.string().optional(),
+    ssl: z.boolean().default(true),
+  };
   
   // Ajouter des champs spécifiques dynamiquement si nécessaire
   if (specificFields && specificFields.additionalFields) {
-    const additionalSchemaFields: Record<string, any> = {};
     specificFields.additionalFields.forEach((field: any) => {
       if (field.type === 'checkbox') {
-        additionalSchemaFields[field.name] = z.boolean().default(false);
+        baseSchema[field.name] = z.boolean().default(false);
       } else if (field.required) {
-        additionalSchemaFields[field.name] = z.string().min(1, `${field.label} est requis`);
+        baseSchema[field.name] = z.string().min(1, `${field.label} est requis`);
       } else {
-        additionalSchemaFields[field.name] = z.string().optional();
+        baseSchema[field.name] = z.string().optional();
       }
     });
-    schema = schema.extend(additionalSchemaFields);
   }
 
-  return schema;
+  return z.object(baseSchema) as z.ZodType<DatabaseFormValues>;
 };
 
 // Fonction pour construire le schéma dynamique pour les fichiers
 const buildDynamicFileSchema = (specificFields: any) => {
-  let schema = fileConnectorSchema;
+  // Créer un objet de schéma de base
+  const baseSchema = {
+    name: z.string().min(3, "Le nom doit avoir au moins 3 caractères"),
+    type: z.string(),
+    host: z.string().min(1, "L'hôte est requis"),
+    port: z.string().optional(),
+    path: z.string().min(1, "Le chemin est requis"),
+    username: z.string().optional(),
+    password: z.string().optional(),
+    ssl: z.boolean().default(true),
+  };
   
   // Ajouter des champs spécifiques dynamiquement si nécessaire
   if (specificFields && specificFields.additionalFields) {
-    const additionalSchemaFields: Record<string, any> = {};
     specificFields.additionalFields.forEach((field: any) => {
       if (field.type === 'checkbox') {
-        additionalSchemaFields[field.name] = z.boolean().default(false);
+        baseSchema[field.name] = z.boolean().default(false);
       } else if (field.required) {
-        additionalSchemaFields[field.name] = z.string().min(1, `${field.label} est requis`);
+        baseSchema[field.name] = z.string().min(1, `${field.label} est requis`);
       } else {
-        additionalSchemaFields[field.name] = z.string().optional();
+        baseSchema[field.name] = z.string().optional();
       }
     });
-    schema = schema.extend(additionalSchemaFields);
   }
 
-  return schema;
+  return z.object(baseSchema) as z.ZodType<FileFormValues>;
 };
 
 const Connectors = () => {
@@ -950,295 +941,3 @@ const Connectors = () => {
                       </div>
                     </CardHeader>
                     <CardContent>
-                      <div className="flex items-center justify-between mb-4">
-                        <div>{connector.icon}</div>
-                        <div className="text-right">
-                          <h4 className="text-lg font-bold">{connector.vendor}</h4>
-                          <p className="text-sm text-muted-foreground">
-                            {connector.host}
-                          </p>
-                        </div>
-                      </div>
-                      <div className="flex justify-between text-sm pt-4 border-t">
-                        <div>
-                          <p className="text-muted-foreground">Dernière synchro</p>
-                          <p className="font-medium">{connector.lastSync}</p>
-                        </div>
-                      </div>
-                    </CardContent>
-                    <CardFooter className="flex gap-2">
-                      {connector.status === 'connected' ? (
-                        <>
-                          <Button variant="outline" size="sm" className="flex-1">
-                            Explorer
-                          </Button>
-                          <Button variant="outline" size="sm" className="flex-1">
-                            Configurer
-                          </Button>
-                        </>
-                      ) : connector.status === 'pending' ? (
-                        <Button size="sm" className="w-full">
-                          Se connecter
-                        </Button>
-                      ) : (
-                        <Button size="sm" className="w-full bg-red-500 hover:bg-red-600">
-                          Corriger
-                        </Button>
-                      )}
-                    </CardFooter>
-                  </Card>
-                ))}
-              </div>
-            </TabsContent>
-            
-            <TabsContent value="database" className="mt-0">
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                {[
-                  {
-                    id: "connector-1",
-                    name: "PostgreSQL Production",
-                    type: "database",
-                    vendor: "PostgreSQL",
-                    host: "db.example.com",
-                    status: "connected",
-                    lastSync: "5 minutes ago",
-                    icon: <Database className="h-12 w-12 text-blue-500" />
-                  },
-                  {
-                    id: "connector-2",
-                    name: "MongoDB Analytics",
-                    type: "database",
-                    vendor: "MongoDB",
-                    host: "mongo.example.com",
-                    status: "connected",
-                    lastSync: "10 minutes ago",
-                    icon: <Database className="h-12 w-12 text-green-500" />
-                  },
-                  {
-                    id: "connector-3",
-                    name: "MySQL Legacy",
-                    type: "database",
-                    vendor: "MySQL",
-                    host: "mysql.internal",
-                    status: "error",
-                    lastSync: "Failed 30 minutes ago",
-                    icon: <Database className="h-12 w-12 text-orange-500" />
-                  },
-                  {
-                    id: "connector-4",
-                    name: "ElasticSearch",
-                    type: "database",
-                    vendor: "Elasticsearch",
-                    host: "elastic.example.com",
-                    status: "connected",
-                    lastSync: "15 minutes ago",
-                    icon: <Database className="h-12 w-12 text-yellow-500" />
-                  },
-                  {
-                    id: "connector-8",
-                    name: "Oracle Finance",
-                    type: "database",
-                    vendor: "Oracle",
-                    host: "oracle.example.com",
-                    status: "connected",
-                    lastSync: "1 heure ago",
-                    icon: <Database className="h-12 w-12 text-red-500" />
-                  },
-                  {
-                    id: "connector-9",
-                    name: "SQL Server HR",
-                    type: "database",
-                    vendor: "SQL Server",
-                    host: "sqlserver.example.com",
-                    status: "connected",
-                    lastSync: "45 minutes ago",
-                    icon: <Database className="h-12 w-12 text-blue-700" />
-                  }
-                ].map(connector => (
-                  <Card key={connector.id}>
-                    <CardHeader className="pb-2">
-                      <div className="flex justify-between items-start">
-                        <CardTitle className="text-lg">{connector.name}</CardTitle>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <Badge
-                          variant="outline"
-                          className="bg-blue-50 text-blue-800 border-blue-200"
-                        >
-                          Base de données
-                        </Badge>
-                        <Badge
-                          variant="outline"
-                          className={`
-                            ${connector.status === 'connected' ? 'bg-green-50 text-green-800 border-green-200' : 
-                              connector.status === 'pending' ? 'bg-yellow-50 text-yellow-800 border-yellow-200' :
-                              'bg-red-50 text-red-800 border-red-200'
-                            }
-                          `}
-                        >
-                          {connector.status === 'connected' ? 'Connecté' : 
-                           connector.status === 'pending' ? 'En attente' : 'Erreur'}
-                        </Badge>
-                      </div>
-                    </CardHeader>
-                    <CardContent>
-                      <div className="flex items-center justify-between mb-4">
-                        <div>{connector.icon}</div>
-                        <div className="text-right">
-                          <h4 className="text-lg font-bold">{connector.vendor}</h4>
-                          <p className="text-sm text-muted-foreground">
-                            {connector.host}
-                          </p>
-                        </div>
-                      </div>
-                      <div className="flex justify-between text-sm pt-4 border-t">
-                        <div>
-                          <p className="text-muted-foreground">Dernière synchro</p>
-                          <p className="font-medium">{connector.lastSync}</p>
-                        </div>
-                      </div>
-                    </CardContent>
-                    <CardFooter className="flex gap-2">
-                      {connector.status === 'connected' ? (
-                        <>
-                          <Button variant="outline" size="sm" className="flex-1">
-                            Explorer
-                          </Button>
-                          <Button variant="outline" size="sm" className="flex-1">
-                            Configurer
-                          </Button>
-                        </>
-                      ) : connector.status === 'pending' ? (
-                        <Button size="sm" className="w-full">
-                          Se connecter
-                        </Button>
-                      ) : (
-                        <Button size="sm" className="w-full bg-red-500 hover:bg-red-600">
-                          Corriger
-                        </Button>
-                      )}
-                    </CardFooter>
-                  </Card>
-                ))}
-              </div>
-            </TabsContent>
-            
-            <TabsContent value="file" className="mt-0">
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                {[
-                  {
-                    id: "connector-5",
-                    name: "Fichiers SFTP",
-                    type: "file",
-                    vendor: "SFTP",
-                    host: "sftp.example.com",
-                    status: "connected",
-                    lastSync: "20 minutes ago",
-                    icon: <FileType2 className="h-12 w-12 text-purple-500" />
-                  },
-                  {
-                    id: "connector-6",
-                    name: "Amazon S3",
-                    type: "file",
-                    vendor: "S3",
-                    host: "s3.amazonaws.com",
-                    status: "connected",
-                    lastSync: "5 minutes ago",
-                    icon: <FileType2 className="h-12 w-12 text-indigo-500" />
-                  },
-                  {
-                    id: "connector-7",
-                    name: "Google Cloud Storage",
-                    type: "file",
-                    vendor: "GCS",
-                    host: "storage.googleapis.com",
-                    status: "pending",
-                    lastSync: "Jamais",
-                    icon: <FileType2 className="h-12 w-12 text-blue-500" />
-                  },
-                  {
-                    id: "connector-10",
-                    name: "Partage Windows SMB",
-                    type: "file",
-                    vendor: "SMB",
-                    host: "\\\\server\\share",
-                    status: "error",
-                    lastSync: "Failed 2 heures ago",
-                    icon: <FileType2 className="h-12 w-12 text-teal-500" />
-                  }
-                ].map(connector => (
-                  <Card key={connector.id}>
-                    <CardHeader className="pb-2">
-                      <div className="flex justify-between items-start">
-                        <CardTitle className="text-lg">{connector.name}</CardTitle>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <Badge
-                          variant="outline"
-                          className="bg-purple-50 text-purple-800 border-purple-200"
-                        >
-                          Fichiers
-                        </Badge>
-                        <Badge
-                          variant="outline"
-                          className={`
-                            ${connector.status === 'connected' ? 'bg-green-50 text-green-800 border-green-200' : 
-                              connector.status === 'pending' ? 'bg-yellow-50 text-yellow-800 border-yellow-200' :
-                              'bg-red-50 text-red-800 border-red-200'
-                            }
-                          `}
-                        >
-                          {connector.status === 'connected' ? 'Connecté' : 
-                           connector.status === 'pending' ? 'En attente' : 'Erreur'}
-                        </Badge>
-                      </div>
-                    </CardHeader>
-                    <CardContent>
-                      <div className="flex items-center justify-between mb-4">
-                        <div>{connector.icon}</div>
-                        <div className="text-right">
-                          <h4 className="text-lg font-bold">{connector.vendor}</h4>
-                          <p className="text-sm text-muted-foreground">
-                            {connector.host}
-                          </p>
-                        </div>
-                      </div>
-                      <div className="flex justify-between text-sm pt-4 border-t">
-                        <div>
-                          <p className="text-muted-foreground">Dernière synchro</p>
-                          <p className="font-medium">{connector.lastSync}</p>
-                        </div>
-                      </div>
-                    </CardContent>
-                    <CardFooter className="flex gap-2">
-                      {connector.status === 'connected' ? (
-                        <>
-                          <Button variant="outline" size="sm" className="flex-1">
-                            Explorer
-                          </Button>
-                          <Button variant="outline" size="sm" className="flex-1">
-                            Configurer
-                          </Button>
-                        </>
-                      ) : connector.status === 'pending' ? (
-                        <Button size="sm" className="w-full">
-                          Se connecter
-                        </Button>
-                      ) : (
-                        <Button size="sm" className="w-full bg-red-500 hover:bg-red-600">
-                          Corriger
-                        </Button>
-                      )}
-                    </CardFooter>
-                  </Card>
-                ))}
-              </div>
-            </TabsContent>
-          </Tabs>
-        </div>
-      </div>
-    </SidebarWrapper>
-  );
-};
-
-export default Connectors;
