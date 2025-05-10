@@ -7,6 +7,7 @@ import { Label } from "@/components/ui/label";
 import { useForm } from "react-hook-form";
 import { useToast } from "@/hooks/use-toast";
 import { Mail, KeyRound, Eye, EyeOff } from "lucide-react";
+import { useAuth } from "@/contexts/AuthContext";
 
 interface LoginFormData {
   email: string;
@@ -19,6 +20,7 @@ const Login = () => {
   const [showPassword, setShowPassword] = useState(false);
   const navigate = useNavigate();
   const { toast } = useToast();
+  const { login } = useAuth();
   const { register, handleSubmit, formState: { errors } } = useForm<LoginFormData>();
 
   const onSubmit = async (data: LoginFormData) => {
@@ -31,12 +33,20 @@ const Login = () => {
       // Simuler un délai d'authentification
       await new Promise(resolve => setTimeout(resolve, 1000));
       
+      // Pour démonstration: si email contient 'admin', connecter en tant qu'admin
+      const userRole = data.email.includes('admin') ? 'admin' : 'user';
+      login(userRole);
+      
       toast({
         title: "Connexion réussie",
-        description: "Bienvenue sur AI DataFlow Platform",
+        description: `Bienvenue sur AI DataFlow Platform (${userRole})`,
       });
       
-      navigate("/");
+      if (userRole === 'admin') {
+        navigate("/");  // Rediriger vers le tableau de bord admin
+      } else {
+        navigate("/prompt-analyzer");  // Rediriger vers l'analyseur de prompt pour les utilisateurs
+      }
     } catch (error) {
       console.error("Login error:", error);
       toast({
@@ -130,6 +140,11 @@ const Login = () => {
             <Button type="submit" className="w-full" disabled={isLoading}>
               {isLoading ? "Connexion en cours..." : "Se connecter"}
             </Button>
+
+            <div className="text-center text-sm text-gray-600">
+              <p>Pour tester: utilisez un email avec "admin" pour le rôle admin</p>
+              <p className="mt-1">Exemple: admin@example.com / user@example.com</p>
+            </div>
 
             <div className="relative my-4">
               <div className="absolute inset-0 flex items-center">

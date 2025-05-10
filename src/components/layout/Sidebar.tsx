@@ -24,6 +24,7 @@ import {
   Server,
   Search
 } from "lucide-react";
+import { useAuth } from "@/contexts/AuthContext";
 
 const menuItems = [
   {
@@ -145,12 +146,20 @@ export function AppSidebar() {
 }
 
 export default function SidebarWrapper({ children }: { children: React.ReactNode }) {
-  return (
-    <SidebarProvider>
-      <div className="min-h-screen flex w-full">
-        <AppSidebar />
-        <main className="flex-1">{children}</main>
-      </div>
-    </SidebarProvider>
-  );
+  const { userRole } = useAuth();
+  
+  // Si l'utilisateur est admin, afficher avec la sidebar
+  if (userRole === 'admin') {
+    return (
+      <SidebarProvider>
+        <div className="min-h-screen flex w-full">
+          <AppSidebar />
+          <main className="flex-1">{children}</main>
+        </div>
+      </SidebarProvider>
+    );
+  }
+  
+  // Sinon, afficher sans sidebar
+  return <div className="min-h-screen">{children}</div>;
 }

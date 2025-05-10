@@ -21,35 +21,43 @@ import Privacy from "./pages/Privacy";
 import Settings from "./pages/Settings";
 import PromptAnalyzer from "./pages/PromptAnalyzer";
 import AnalysisResults from "./pages/AnalysisResults";
+import { AuthProvider } from "./contexts/AuthContext";
 
 const queryClient = new QueryClient();
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <TooltipProvider>
-      <Toaster />
-      <Sonner />
-      <BrowserRouter>
-        <Routes>
-          <Route path="/" element={<SidebarWrapper><Index /></SidebarWrapper>} />
-          <Route path="/agents" element={<SidebarWrapper><Agents /></SidebarWrapper>} />
-          <Route path="/workflows" element={<SidebarWrapper><Workflows /></SidebarWrapper>} />
-          <Route path="/storage" element={<SidebarWrapper><Storage /></SidebarWrapper>} />
-          <Route path="/sources" element={<SidebarWrapper><Sources /></SidebarWrapper>} />
-          <Route path="/connectors" element={<SidebarWrapper><Connectors /></SidebarWrapper>} />
-          <Route path="/login" element={<Login />} />
-          <Route path="/register" element={<Register />} />
-          <Route path="/forgot-password" element={<ForgotPassword />} />
-          <Route path="/analytics" element={<SidebarWrapper><Analytics /></SidebarWrapper>} />
-          <Route path="/terms" element={<Terms />} />
-          <Route path="/privacy" element={<Privacy />} />
-          <Route path="/settings" element={<SidebarWrapper><Settings /></SidebarWrapper>} />
-          <Route path="/prompt-analyzer" element={<SidebarWrapper><PromptAnalyzer /></SidebarWrapper>} />
-          <Route path="/analysis-results" element={<SidebarWrapper><AnalysisResults /></SidebarWrapper>} />
-          {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-          <Route path="*" element={<NotFound />} />
-        </Routes>
-      </BrowserRouter>
+      <AuthProvider>
+        <Toaster />
+        <Sonner />
+        <BrowserRouter>
+          <Routes>
+            {/* Routes protégées par admin */}
+            <Route path="/" element={<SidebarWrapper><Index /></SidebarWrapper>} />
+            <Route path="/agents" element={<SidebarWrapper><Agents /></SidebarWrapper>} />
+            <Route path="/workflows" element={<SidebarWrapper><Workflows /></SidebarWrapper>} />
+            <Route path="/storage" element={<SidebarWrapper><Storage /></SidebarWrapper>} />
+            <Route path="/sources" element={<SidebarWrapper><Sources /></SidebarWrapper>} />
+            <Route path="/connectors" element={<SidebarWrapper><Connectors /></SidebarWrapper>} />
+            <Route path="/analytics" element={<SidebarWrapper><Analytics /></SidebarWrapper>} />
+            <Route path="/settings" element={<SidebarWrapper><Settings /></SidebarWrapper>} />
+            
+            {/* Routes accessibles à tous */}
+            <Route path="/login" element={<Login />} />
+            <Route path="/register" element={<Register />} />
+            <Route path="/forgot-password" element={<ForgotPassword />} />
+            <Route path="/terms" element={<Terms />} />
+            <Route path="/privacy" element={<Privacy />} />
+            
+            {/* Routes d'analyse de prompt accessibles à tous */}
+            <Route path="/prompt-analyzer" element={<PromptAnalyzer />} />
+            <Route path="/analysis-results" element={<AnalysisResults />} />
+            
+            <Route path="*" element={<NotFound />} />
+          </Routes>
+        </BrowserRouter>
+      </AuthProvider>
     </TooltipProvider>
   </QueryClientProvider>
 );
