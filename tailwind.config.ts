@@ -1,3 +1,4 @@
+
 import type { Config } from "tailwindcss";
 
 export default {
@@ -61,7 +62,44 @@ export default {
 					'accent-foreground': 'hsl(var(--sidebar-accent-foreground))',
 					border: 'hsl(var(--sidebar-border))',
 					ring: 'hsl(var(--sidebar-ring))'
-				}
+				},
+				// Custom color palette for our application
+				'blue': {
+					50: '#EBF5FF',
+					100: '#E1EFFE',
+					200: '#C3DDFD',
+					300: '#A4CAFE',
+					400: '#76A9FA',
+					500: '#3F83F8',
+					600: '#1C64F2',
+					700: '#1A365D',
+					800: '#1E429F',
+					900: '#233876',
+				},
+				'teal': {
+					50: '#EDFAFA',
+					100: '#D5F5F6',
+					200: '#AFECEF',
+					300: '#7EDCE2',
+					400: '#16BDCA',
+					500: '#0694A2',
+					600: '#047481',
+					700: '#036672',
+					800: '#285E61',
+					900: '#234E52',
+				},
+				'purple': {
+					50: '#FAF5FF',
+					100: '#F3E8FF',
+					200: '#E9D5FF',
+					300: '#D8B4FE',
+					400: '#C084FC',
+					500: '#A855F7',
+					600: '#9333EA',
+					700: '#7E22CE',
+					800: '#6B21A8',
+					900: '#553C9A',
+				},
 			},
 			borderRadius: {
 				lg: 'var(--radius)',
@@ -84,11 +122,16 @@ export default {
 					to: {
 						height: '0'
 					}
+				},
+				'pulse-slow': {
+					'0%, 100%': { opacity: '1' },
+					'50%': { opacity: '0.5' },
 				}
 			},
 			animation: {
 				'accordion-down': 'accordion-down 0.2s ease-out',
-				'accordion-up': 'accordion-up 0.2s ease-out'
+				'accordion-up': 'accordion-up 0.2s ease-out',
+				'pulse-slow': 'pulse-slow 3s cubic-bezier(0.4, 0, 0.6, 1) infinite',
 			}
 		}
 	},
