@@ -157,6 +157,6 @@ export default function SidebarWrapper({ children }: { children: React.ReactNode
     );
   }
   
-  // Sinon, afficher sans sidebar
-  return <div className="min-h-screen">{children}</div>;
+  // Sinon, afficher sans sidebar mais avec une classe pour centrer
+  return <div className="min-h-screen w-full">{children}</div>;
 }
