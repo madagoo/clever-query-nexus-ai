@@ -1,3 +1,4 @@
+
 import Header from "@/components/layout/Header";
 import SidebarWrapper from "@/components/layout/Sidebar";
 import { useState, useEffect } from "react";
@@ -128,12 +129,25 @@ const fileSpecificFields = {
   }
 };
 
-// Schéma de base pour les connecteurs
-const baseConnectorSchema = z.object({
+// Schéma de base pour les connecteurs de base de données
+const databaseConnectorSchema = z.object({
   name: z.string().min(3, "Le nom doit avoir au moins 3 caractères"),
   type: z.string(),
   host: z.string().min(1, "L'hôte est requis"),
   port: z.string().optional(),
+  database: z.string().min(1, "Le nom de la base de données est requis"),
+  username: z.string().optional(),
+  password: z.string().optional(),
+  ssl: z.boolean().default(true),
+});
+
+// Schéma de base pour les connecteurs de fichiers
+const fileConnectorSchema = z.object({
+  name: z.string().min(3, "Le nom doit avoir au moins 3 caractères"),
+  type: z.string(),
+  host: z.string().min(1, "L'hôte est requis"),
+  port: z.string().optional(),
+  path: z.string().min(1, "Le chemin est requis"),
   username: z.string().optional(),
   password: z.string().optional(),
   ssl: z.boolean().default(true),
@@ -141,18 +155,8 @@ const baseConnectorSchema = z.object({
 
 // Fonction pour construire le schéma dynamique en fonction du type
 const buildDynamicSchema = (type, specificFields) => {
-  let schema = baseConnectorSchema;
+  let schema = type === 'database' ? databaseConnectorSchema : fileConnectorSchema;
   
-  if (type === 'database') {
-    schema = schema.extend({
-      database: z.string().min(1, "Le nom de la base de données est requis"),
-    });
-  } else if (type === 'file') {
-    schema = schema.extend({
-      path: z.string().min(1, "Le chemin est requis"),
-    });
-  }
-
   // Ajouter des champs spécifiques dynamiquement si nécessaire
   if (specificFields && specificFields.additionalFields) {
     const additionalSchemaFields = {};
@@ -178,7 +182,8 @@ const Connectors = () => {
   const [selectedFileType, setSelectedFileType] = useState("sftp");
   const [dynamicSchema, setDynamicSchema] = useState(buildDynamicSchema('database', databaseSpecificFields.postgresql));
   
-  const form = useForm({
+  // Créer deux formulaires séparés pour les deux types de connexion
+  const databaseForm = useForm({
     resolver: zodResolver(dynamicSchema),
     defaultValues: {
       name: "",
@@ -191,6 +196,23 @@ const Connectors = () => {
       ssl: true,
     },
   });
+
+  const fileForm = useForm({
+    resolver: zodResolver(dynamicSchema),
+    defaultValues: {
+      name: "",
+      type: "sftp",
+      host: "",
+      port: fileSpecificFields.sftp.defaultPort,
+      path: "",
+      username: "",
+      password: "",
+      ssl: true,
+    },
+  });
+
+  // Utiliser le formulaire approprié en fonction du type de connexion
+  const form = connectionType === "database" ? databaseForm : fileForm;
 
   // Mettre à jour le schéma et les valeurs par défaut quand le type change
   useEffect(() => {
@@ -267,7 +289,7 @@ const Connectors = () => {
       <FormField
         key={field.name}
         control={form.control}
-        name={field.name}
+        name={field.name as any}
         render={({ field: formField }) => (
           <FormItem>
             <FormLabel>{field.label}</FormLabel>
@@ -334,10 +356,10 @@ const Connectors = () => {
                   </TabsList>
                   
                   <TabsContent value="database" className="mt-4">
-                    <Form {...form}>
-                      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+                    <Form {...databaseForm}>
+                      <form onSubmit={databaseForm.handleSubmit(onSubmit)} className="space-y-4">
                         <FormField
-                          control={form.control}
+                          control={databaseForm.control}
                           name="name"
                           render={({ field }) => (
                             <FormItem>
@@ -351,7 +373,7 @@ const Connectors = () => {
                         />
 
                         <FormField
-                          control={form.control}
+                          control={databaseForm.control}
                           name="type"
                           render={({ field }) => (
                             <FormItem>
@@ -384,7 +406,7 @@ const Connectors = () => {
 
                         <div className="grid grid-cols-2 gap-4">
                           <FormField
-                            control={form.control}
+                            control={databaseForm.control}
                             name="host"
                             render={({ field }) => (
                               <FormItem>
@@ -398,7 +420,7 @@ const Connectors = () => {
                           />
 
                           <FormField
-                            control={form.control}
+                            control={databaseForm.control}
                             name="port"
                             render={({ field }) => (
                               <FormItem>
@@ -413,7 +435,7 @@ const Connectors = () => {
                         </div>
 
                         <FormField
-                          control={form.control}
+                          control={databaseForm.control}
                           name="database"
                           render={({ field }) => (
                             <FormItem>
@@ -431,7 +453,7 @@ const Connectors = () => {
 
                         <div className="grid grid-cols-2 gap-4">
                           <FormField
-                            control={form.control}
+                            control={databaseForm.control}
                             name="username"
                             render={({ field }) => (
                               <FormItem>
@@ -445,7 +467,7 @@ const Connectors = () => {
                           />
 
                           <FormField
-                            control={form.control}
+                            control={databaseForm.control}
                             name="password"
                             render={({ field }) => (
                               <FormItem>
@@ -460,7 +482,7 @@ const Connectors = () => {
                         </div>
 
                         <FormField
-                          control={form.control}
+                          control={databaseForm.control}
                           name="ssl"
                           render={({ field }) => (
                             <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4">
@@ -490,10 +512,10 @@ const Connectors = () => {
                   </TabsContent>
 
                   <TabsContent value="file" className="mt-4">
-                    <Form {...form}>
-                      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+                    <Form {...fileForm}>
+                      <form onSubmit={fileForm.handleSubmit(onSubmit)} className="space-y-4">
                         <FormField
-                          control={form.control}
+                          control={fileForm.control}
                           name="name"
                           render={({ field }) => (
                             <FormItem>
@@ -507,7 +529,7 @@ const Connectors = () => {
                         />
 
                         <FormField
-                          control={form.control}
+                          control={fileForm.control}
                           name="type"
                           render={({ field }) => (
                             <FormItem>
@@ -541,7 +563,7 @@ const Connectors = () => {
 
                         <div className="grid grid-cols-2 gap-4">
                           <FormField
-                            control={form.control}
+                            control={fileForm.control}
                             name="host"
                             render={({ field }) => (
                               <FormItem>
@@ -555,7 +577,7 @@ const Connectors = () => {
                           />
 
                           <FormField
-                            control={form.control}
+                            control={fileForm.control}
                             name="port"
                             render={({ field }) => (
                               <FormItem>
@@ -574,7 +596,7 @@ const Connectors = () => {
 
                         <div className="grid grid-cols-2 gap-4">
                           <FormField
-                            control={form.control}
+                            control={fileForm.control}
                             name="username"
                             render={({ field }) => (
                               <FormItem>
@@ -588,7 +610,7 @@ const Connectors = () => {
                           />
 
                           <FormField
-                            control={form.control}
+                            control={fileForm.control}
                             name="password"
                             render={({ field }) => (
                               <FormItem>
@@ -603,7 +625,7 @@ const Connectors = () => {
                         </div>
 
                         <FormField
-                          control={form.control}
+                          control={fileForm.control}
                           name="path"
                           render={({ field }) => (
                             <FormItem>
@@ -617,7 +639,7 @@ const Connectors = () => {
                         />
 
                         <FormField
-                          control={form.control}
+                          control={fileForm.control}
                           name="ssl"
                           render={({ field }) => (
                             <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4">
