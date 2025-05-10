@@ -1,3 +1,4 @@
+
 import Header from "@/components/layout/Header";
 import SidebarWrapper from "@/components/layout/Sidebar";
 import { useState, useEffect } from "react";
@@ -404,37 +405,37 @@ const Connectors = () => {
   };
 
   return (
-    <div className="flex flex-col min-h-screen">
-      <Header title="Connecteurs" />
-      <div className="flex-1 p-6">
-        <div className="flex justify-between items-center mb-6">
-          <div>
-            <h1 className="text-2xl font-bold tracking-tight">Gestionnaire de Connecteurs</h1>
-            <p className="text-muted-foreground">
-              Connectez-vous à des bases de données ou des répertoires de fichiers distants
-            </p>
-          </div>
-          <Dialog open={isConnectDialogOpen} onOpenChange={setIsConnectDialogOpen}>
-            <DialogTrigger asChild>
-              <Button>
-                <Server className="h-4 w-4 mr-2" />
-                Nouvelle Connexion
-              </Button>
-            </DialogTrigger>
-            <DialogContent className="sm:max-w-[525px]">
-              <DialogHeader>
-                <DialogTitle>Ajouter une nouvelle connexion</DialogTitle>
-                <DialogDescription>
-                  Configurez les détails de votre nouvelle connexion
-                </DialogDescription>
-              </DialogHeader>
+    <SidebarWrapper>
+      <div className="flex flex-col min-h-screen">
+        <Header title="Connecteurs" />
+        <div className="flex-1 p-6">
+          <div className="flex justify-between items-center mb-6">
+            <div>
+              <h1 className="text-2xl font-bold tracking-tight">Gestionnaire de Connecteurs</h1>
+              <p className="text-muted-foreground">
+                Connectez-vous à des bases de données ou des répertoires de fichiers distants
+              </p>
+            </div>
+            <Dialog open={isConnectDialogOpen} onOpenChange={setIsConnectDialogOpen}>
+              <DialogTrigger asChild>
+                <Button>
+                  <Server className="h-4 w-4 mr-2" />
+                  Nouvelle Connexion
+                </Button>
+              </DialogTrigger>
+              <DialogContent className="sm:max-w-[525px]">
+                <DialogHeader>
+                  <DialogTitle>Ajouter une nouvelle connexion</DialogTitle>
+                  <DialogDescription>
+                    Configurez les détails de votre nouvelle connexion
+                  </DialogDescription>
+                </DialogHeader>
 
-              <Tabs defaultValue="database" className="mt-4" onValueChange={(value) => setConnectionType(value as "database" | "file")}>
-                <TabsList className="grid w-full grid-cols-2">
-                  <TabsTrigger value="database">Base de données</TabsTrigger>
-                  <TabsTrigger value="file">Fichiers</TabsTrigger>
-                </TabsList>
-                
+                <Tabs defaultValue="database" className="mt-4" onValueChange={(value) => setConnectionType(value as "database" | "file")}>
+                  <TabsList className="grid w-full grid-cols-2">
+                    <TabsTrigger value="database">Base de données</TabsTrigger>
+                    <TabsTrigger value="file">Fichiers</TabsTrigger>
+                  </TabsList>
                   
                   <TabsContent value="database" className="mt-4">
                     <Form {...databaseForm}>
@@ -941,4 +942,47 @@ const Connectors = () => {
                       </div>
                     </CardHeader>
                     <CardContent>
-                      <div className="flex
+                      <div className="flex flex-col">
+                        <div className="flex items-center gap-2 mb-1">
+                          <span className="text-sm font-medium text-gray-500">Hôte:</span>
+                          <span className="text-sm">{connector.host}</span>
+                        </div>
+                        <div className="flex items-center gap-2 mb-1">
+                          <span className="text-sm font-medium text-gray-500">Type:</span>
+                          <span className="text-sm">{connector.vendor}</span>
+                        </div>
+                        <div className="flex items-center gap-2 mb-1">
+                          <span className="text-sm font-medium text-gray-500">Dernière sync:</span>
+                          <span className="text-sm">{connector.lastSync}</span>
+                        </div>
+                      </div>
+                    </CardContent>
+                    <CardFooter>
+                      <Button variant="outline" size="sm" className="w-full">
+                        Connecter
+                      </Button>
+                    </CardFooter>
+                  </Card>
+                ))}
+              </div>
+            </TabsContent>
+            
+            <TabsContent value="database">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                {/* Filtrer uniquement les connecteurs de type database */}
+              </div>
+            </TabsContent>
+            
+            <TabsContent value="file">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                {/* Filtrer uniquement les connecteurs de type file */}
+              </div>
+            </TabsContent>
+          </Tabs>
+        </div>
+      </div>
+    </SidebarWrapper>
+  );
+};
+
+export default Connectors;
