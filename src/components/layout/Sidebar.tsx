@@ -21,7 +21,8 @@ import {
   Settings,
   LogIn,
   UserPlus,
-  Server
+  Server,
+  Search
 } from "lucide-react";
 
 const menuItems = [
@@ -59,6 +60,11 @@ const menuItems = [
     title: "Analytique",
     icon: BarChart4,
     path: "/analytics"
+  },
+  {
+    title: "Analyseur de Prompts",
+    icon: Search,
+    path: "/prompt-analyzer"
   },
   {
     title: "Paramètres",
