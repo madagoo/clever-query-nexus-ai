@@ -4,6 +4,7 @@ import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
+import SidebarWrapper from "./components/layout/Sidebar";
 import Index from "./pages/Index";
 import Agents from "./pages/Agents";
 import Workflows from "./pages/Workflows";
@@ -30,21 +31,21 @@ const App = () => (
       <Sonner />
       <BrowserRouter>
         <Routes>
-          <Route path="/" element={<Index />} />
-          <Route path="/agents" element={<Agents />} />
-          <Route path="/workflows" element={<Workflows />} />
-          <Route path="/storage" element={<Storage />} />
-          <Route path="/sources" element={<Sources />} />
-          <Route path="/connectors" element={<Connectors />} />
+          <Route path="/" element={<SidebarWrapper><Index /></SidebarWrapper>} />
+          <Route path="/agents" element={<SidebarWrapper><Agents /></SidebarWrapper>} />
+          <Route path="/workflows" element={<SidebarWrapper><Workflows /></SidebarWrapper>} />
+          <Route path="/storage" element={<SidebarWrapper><Storage /></SidebarWrapper>} />
+          <Route path="/sources" element={<SidebarWrapper><Sources /></SidebarWrapper>} />
+          <Route path="/connectors" element={<SidebarWrapper><Connectors /></SidebarWrapper>} />
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
           <Route path="/forgot-password" element={<ForgotPassword />} />
-          <Route path="/analytics" element={<Analytics />} />
+          <Route path="/analytics" element={<SidebarWrapper><Analytics /></SidebarWrapper>} />
           <Route path="/terms" element={<Terms />} />
           <Route path="/privacy" element={<Privacy />} />
-          <Route path="/settings" element={<Settings />} />
-          <Route path="/prompt-analyzer" element={<PromptAnalyzer />} />
-          <Route path="/analysis-results" element={<AnalysisResults />} />
+          <Route path="/settings" element={<SidebarWrapper><Settings /></SidebarWrapper>} />
+          <Route path="/prompt-analyzer" element={<SidebarWrapper><PromptAnalyzer /></SidebarWrapper>} />
+          <Route path="/analysis-results" element={<SidebarWrapper><AnalysisResults /></SidebarWrapper>} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>
