@@ -6,15 +6,17 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useForm } from "react-hook-form";
 import { useToast } from "@/hooks/use-toast";
-import { User, KeyRound } from "lucide-react";
+import { Mail, KeyRound, Eye, EyeOff } from "lucide-react";
 
 interface LoginFormData {
   email: string;
   password: string;
+  rememberMe?: boolean;
 }
 
 const Login = () => {
   const [isLoading, setIsLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
   const navigate = useNavigate();
   const { toast } = useToast();
   const { register, handleSubmit, formState: { errors } } = useForm<LoginFormData>();
@@ -59,7 +61,7 @@ const Login = () => {
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
             <div className="space-y-2">
               <div className="flex items-center">
-                <User className="mr-2 h-5 w-5 text-gray-400" />
+                <Mail className="mr-2 h-5 w-5 text-gray-400" />
                 <Label htmlFor="email">Email</Label>
               </div>
               <Input
@@ -85,18 +87,39 @@ const Login = () => {
                 <KeyRound className="mr-2 h-5 w-5 text-gray-400" />
                 <Label htmlFor="password">Mot de passe</Label>
               </div>
-              <Input
-                id="password"
-                type="password"
-                {...register("password", { required: "Le mot de passe est requis" })}
-                className={errors.password ? "border-red-500" : ""}
-              />
+              <div className="relative">
+                <Input
+                  id="password"
+                  type={showPassword ? "text" : "password"}
+                  placeholder="********"
+                  {...register("password", { required: "Le mot de passe est requis" })}
+                  className={errors.password ? "border-red-500 pr-10" : "pr-10"}
+                />
+                <button
+                  type="button"
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500"
+                  onClick={() => setShowPassword(!showPassword)}
+                >
+                  {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                </button>
+              </div>
               {errors.password && (
                 <p className="text-sm text-red-500">{errors.password.message}</p>
               )}
             </div>
             
             <div className="flex items-center justify-between">
+              <div className="flex items-center">
+                <input
+                  id="rememberMe"
+                  type="checkbox"
+                  className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                  {...register("rememberMe")}
+                />
+                <label htmlFor="rememberMe" className="ml-2 block text-sm text-gray-600">
+                  Se souvenir de moi
+                </label>
+              </div>
               <div className="text-sm">
                 <Link to="/forgot-password" className="text-blue-600 hover:text-blue-800">
                   Mot de passe oublié?
@@ -106,6 +129,19 @@ const Login = () => {
             
             <Button type="submit" className="w-full" disabled={isLoading}>
               {isLoading ? "Connexion en cours..." : "Se connecter"}
+            </Button>
+
+            <div className="relative my-4">
+              <div className="absolute inset-0 flex items-center">
+                <div className="w-full border-t border-gray-300"></div>
+              </div>
+              <div className="relative flex justify-center text-sm">
+                <span className="px-2 bg-white text-gray-500">ou</span>
+              </div>
+            </div>
+
+            <Button variant="outline" type="button" className="w-full">
+              Continuer avec Google
             </Button>
           </form>
           
