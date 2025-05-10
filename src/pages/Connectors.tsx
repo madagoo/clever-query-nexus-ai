@@ -129,6 +129,31 @@ const fileSpecificFields = {
   }
 };
 
+// Types pour les schémas de formulaire
+type DatabaseFormValues = {
+  name: string;
+  type: string;
+  host: string;
+  port: string;
+  database: string;
+  username: string;
+  password: string;
+  ssl: boolean;
+  [key: string]: any; // Pour les champs dynamiques
+};
+
+type FileFormValues = {
+  name: string;
+  type: string;
+  host: string;
+  port: string;
+  path: string;
+  username: string;
+  password: string;
+  ssl: boolean;
+  [key: string]: any; // Pour les champs dynamiques
+};
+
 // Schéma de base pour les connecteurs de base de données
 const databaseConnectorSchema = z.object({
   name: z.string().min(3, "Le nom doit avoir au moins 3 caractères"),
@@ -139,7 +164,7 @@ const databaseConnectorSchema = z.object({
   username: z.string().optional(),
   password: z.string().optional(),
   ssl: z.boolean().default(true),
-});
+}) as z.ZodType<DatabaseFormValues>;
 
 // Schéma de base pour les connecteurs de fichiers
 const fileConnectorSchema = z.object({
@@ -151,16 +176,38 @@ const fileConnectorSchema = z.object({
   username: z.string().optional(),
   password: z.string().optional(),
   ssl: z.boolean().default(true),
-});
+}) as z.ZodType<FileFormValues>;
 
 // Fonction pour construire le schéma dynamique en fonction du type
-const buildDynamicSchema = (type, specificFields) => {
-  let schema = type === 'database' ? databaseConnectorSchema : fileConnectorSchema;
+const buildDynamicDatabaseSchema = (specificFields: any) => {
+  let schema = databaseConnectorSchema;
   
   // Ajouter des champs spécifiques dynamiquement si nécessaire
   if (specificFields && specificFields.additionalFields) {
-    const additionalSchemaFields = {};
-    specificFields.additionalFields.forEach(field => {
+    const additionalSchemaFields: Record<string, any> = {};
+    specificFields.additionalFields.forEach((field: any) => {
+      if (field.type === 'checkbox') {
+        additionalSchemaFields[field.name] = z.boolean().default(false);
+      } else if (field.required) {
+        additionalSchemaFields[field.name] = z.string().min(1, `${field.label} est requis`);
+      } else {
+        additionalSchemaFields[field.name] = z.string().optional();
+      }
+    });
+    schema = schema.extend(additionalSchemaFields);
+  }
+
+  return schema;
+};
+
+// Fonction pour construire le schéma dynamique pour les fichiers
+const buildDynamicFileSchema = (specificFields: any) => {
+  let schema = fileConnectorSchema;
+  
+  // Ajouter des champs spécifiques dynamiquement si nécessaire
+  if (specificFields && specificFields.additionalFields) {
+    const additionalSchemaFields: Record<string, any> = {};
+    specificFields.additionalFields.forEach((field: any) => {
       if (field.type === 'checkbox') {
         additionalSchemaFields[field.name] = z.boolean().default(false);
       } else if (field.required) {
@@ -180,11 +227,10 @@ const Connectors = () => {
   const [connectionType, setConnectionType] = useState<"database" | "file">("database");
   const [selectedDbType, setSelectedDbType] = useState("postgresql");
   const [selectedFileType, setSelectedFileType] = useState("sftp");
-  const [dynamicSchema, setDynamicSchema] = useState(buildDynamicSchema('database', databaseSpecificFields.postgresql));
   
   // Créer deux formulaires séparés pour les deux types de connexion
-  const databaseForm = useForm({
-    resolver: zodResolver(dynamicSchema),
+  const databaseForm = useForm<DatabaseFormValues>({
+    resolver: zodResolver(buildDynamicDatabaseSchema(databaseSpecificFields.postgresql)),
     defaultValues: {
       name: "",
       type: "postgresql",
@@ -197,8 +243,8 @@ const Connectors = () => {
     },
   });
 
-  const fileForm = useForm({
-    resolver: zodResolver(dynamicSchema),
+  const fileForm = useForm<FileFormValues>({
+    resolver: zodResolver(buildDynamicFileSchema(fileSpecificFields.sftp)),
     defaultValues: {
       name: "",
       type: "sftp",
@@ -211,65 +257,71 @@ const Connectors = () => {
     },
   });
 
-  // Utiliser le formulaire approprié en fonction du type de connexion
-  const form = connectionType === "database" ? databaseForm : fileForm;
-
   // Mettre à jour le schéma et les valeurs par défaut quand le type change
   useEffect(() => {
-    let specificFields;
-    let defaultPort = "";
-    let defaultValues: any = {
-      name: "",
-      host: "",
-      username: "",
-      password: "",
-      ssl: true,
-    };
-    
     if (connectionType === "database") {
-      specificFields = databaseSpecificFields[selectedDbType];
-      defaultPort = specificFields.defaultPort;
-      defaultValues = {
-        ...defaultValues,
+      const specificFields = databaseSpecificFields[selectedDbType];
+      const defaultPort = specificFields.defaultPort;
+      const defaultValues: Partial<DatabaseFormValues> = {
+        name: "",
         type: selectedDbType,
+        host: "",
         port: defaultPort,
         database: "",
+        username: "",
+        password: "",
+        ssl: true,
       };
       
       // Ajouter les valeurs par défaut pour les champs spécifiques
       if (specificFields.additionalFields) {
-        specificFields.additionalFields.forEach(field => {
+        specificFields.additionalFields.forEach((field: any) => {
           defaultValues[field.name] = field.type === 'checkbox' ? false : "";
         });
       }
+      
+      const newSchema = buildDynamicDatabaseSchema(specificFields);
+      databaseForm.reset(defaultValues);
     } else {
-      specificFields = fileSpecificFields[selectedFileType];
-      defaultPort = specificFields.defaultPort;
-      defaultValues = {
-        ...defaultValues,
+      const specificFields = fileSpecificFields[selectedFileType];
+      const defaultPort = specificFields.defaultPort;
+      const defaultValues: Partial<FileFormValues> = {
+        name: "",
         type: selectedFileType,
+        host: "",
         port: defaultPort,
         path: "",
+        username: "",
+        password: "",
+        ssl: true,
       };
       
       // Ajouter les valeurs par défaut pour les champs spécifiques
       if (specificFields.additionalFields) {
-        specificFields.additionalFields.forEach(field => {
+        specificFields.additionalFields.forEach((field: any) => {
           defaultValues[field.name] = field.type === 'checkbox' ? false : "";
         });
       }
+      
+      const newSchema = buildDynamicFileSchema(specificFields);
+      fileForm.reset(defaultValues);
     }
     
-    const newSchema = buildDynamicSchema(connectionType, specificFields);
-    setDynamicSchema(newSchema);
-    
-    // Reset le formulaire avec les nouvelles valeurs par défaut
-    form.reset(defaultValues);
-    
-  }, [connectionType, selectedDbType, selectedFileType, form]);
+  }, [connectionType, selectedDbType, selectedFileType]);
 
-  const onSubmit = (data) => {
-    console.log("Connexion:", data);
+  const onSubmitDatabase = (data: DatabaseFormValues) => {
+    console.log("Connexion base de données:", data);
+    toast.success(`Connexion à ${data.name} en cours...`);
+    setIsConnectDialogOpen(false);
+    
+    // Simuler un délai pour la connexion
+    setTimeout(() => {
+      toast.success(`Connexion à ${data.name} établie avec succès!`);
+    }, 2000);
+  };
+
+  const onSubmitFile = (data: FileFormValues) => {
+    console.log("Connexion fichier:", data);
     toast.success(`Connexion à ${data.name} en cours...`);
     setIsConnectDialogOpen(false);
     
@@ -280,15 +332,53 @@ const Connectors = () => {
   };
 
   // Fonction pour générer les champs spécifiques en fonction du type sélectionné
-  const renderSpecificFields = () => {
-    const specificFields = connectionType === "database" 
-      ? databaseSpecificFields[selectedDbType]?.additionalFields || []
-      : fileSpecificFields[selectedFileType]?.additionalFields || [];
+  const renderDatabaseSpecificFields = () => {
+    const specificFields = databaseSpecificFields[selectedDbType]?.additionalFields || [];
       
-    return specificFields.map((field) => (
+    return specificFields.map((field: any) => (
       <FormField
         key={field.name}
-        control={form.control}
+        control={databaseForm.control}
+        name={field.name as any}
+        render={({ field: formField }) => (
+          <FormItem>
+            <FormLabel>{field.label}</FormLabel>
+            <FormControl>
+              {field.type === 'checkbox' ? (
+                <div className="flex items-center space-x-2">
+                  <input
+                    type="checkbox"
+                    checked={formField.value}
+                    onChange={formField.onChange}
+                    id={field.name}
+                    className="h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-600"
+                  />
+                  <label htmlFor={field.name} className="text-sm text-gray-700">
+                    Activer
+                  </label>
+                </div>
+              ) : (
+                <Input
+                  type={field.type || "text"}
+                  placeholder={field.placeholder}
+                  {...formField}
+                />
+              )}
+            </FormControl>
+            <FormMessage />
+          </FormItem>
+        )}
+      />
+    ));
+  };
+
+  const renderFileSpecificFields = () => {
+    const specificFields = fileSpecificFields[selectedFileType]?.additionalFields || [];
+      
+    return specificFields.map((field: any) => (
+      <FormField
+        key={field.name}
+        control={fileForm.control}
         name={field.name as any}
         render={({ field: formField }) => (
           <FormItem>
@@ -357,7 +447,7 @@ const Connectors = () => {
                   
                   <TabsContent value="database" className="mt-4">
                     <Form {...databaseForm}>
-                      <form onSubmit={databaseForm.handleSubmit(onSubmit)} className="space-y-4">
+                      <form onSubmit={databaseForm.handleSubmit(onSubmitDatabase)} className="space-y-4">
                         <FormField
                           control={databaseForm.control}
                           name="name"
@@ -449,7 +539,7 @@ const Connectors = () => {
                         />
 
                         {/* Champs spécifiques au type de base de données */}
-                        {renderSpecificFields()}
+                        {renderDatabaseSpecificFields()}
 
                         <div className="grid grid-cols-2 gap-4">
                           <FormField
@@ -513,7 +603,7 @@ const Connectors = () => {
 
                   <TabsContent value="file" className="mt-4">
                     <Form {...fileForm}>
-                      <form onSubmit={fileForm.handleSubmit(onSubmit)} className="space-y-4">
+                      <form onSubmit={fileForm.handleSubmit(onSubmitFile)} className="space-y-4">
                         <FormField
                           control={fileForm.control}
                           name="name"
@@ -592,7 +682,7 @@ const Connectors = () => {
                         </div>
 
                         {/* Champs spécifiques au type de connexion fichier */}
-                        {renderSpecificFields()}
+                        {renderFileSpecificFields()}
 
                         <div className="grid grid-cols-2 gap-4">
                           <FormField
