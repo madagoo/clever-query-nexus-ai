@@ -1,4 +1,3 @@
-
 import Header from "@/components/layout/Header";
 import SidebarWrapper from "@/components/layout/Sidebar";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
@@ -217,7 +216,7 @@ function WorkflowCard({ workflow }: { workflow: typeof workflows[0] }) {
 const Workflows = () => {
   return (
     <SidebarWrapper>
-      <div className="flex flex-col min-h-screen">
+      <div className="flex flex-col min-h-screen bg-white">
         <Header title="Workflows" />
         <div className="flex-1 p-6">
           <div className="flex justify-between items-center mb-6">

@@ -1,19 +1,22 @@
-
 import Header from "@/components/layout/Header";
+import { useState, useEffect } from "react";
 import SidebarWrapper from "@/components/layout/Sidebar";
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import {
-  ChevronDown,
   MoreVertical,
   Play,
   Pause,
-  RefreshCcw,
   Brain,
-  Star,
-  FileText,
-  Search,
-  Settings
+  Settings,
+  Plus,
+  ArrowRight,
+  CheckCircle,
+  AlertCircle,
+  XCircle,
+  Trash2,
+  Edit,
+  Copy
 } from "lucide-react";
 import {
   DropdownMenu,
@@ -23,259 +26,306 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Badge } from "@/components/ui/badge";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import { Switch } from "@/components/ui/switch";
+import { Slider } from "@/components/ui/slider";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Progress } from "@/components/ui/progress";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
-const agents = [
+const initialAgents = [
   {
     id: "agent-1",
-    name: "Data Classifier",
-    description: "Classifies incoming data based on content and metadata",
+    name: "Data Extractor",
+    description: "Extracts key data points from unstructured text",
     status: "active",
-    type: "claude",
-    usage: 87,
-    accuracy: 95,
-    lastRun: "10 minutes ago",
-    starred: true
+    type: "Extraction",
+    model: "GPT-4",
+    cost: 0.02,
+    successRate: 95,
+    avgProcessingTime: 1.2
   },
   {
     id: "agent-2",
-    name: "Anomaly Detector",
-    description: "Identifies unusual patterns in transactional data",
-    status: "active",
-    type: "claude",
-    usage: 62,
-    accuracy: 91,
-    lastRun: "35 minutes ago",
-    starred: true
+    name: "Sentiment Analyzer",
+    description: "Analyzes customer feedback to determine sentiment",
+    status: "idle",
+    type: "Analysis",
+    model: "Claude",
+    cost: 0.015,
+    successRate: 92,
+    avgProcessingTime: 0.9
   },
   {
     id: "agent-3",
-    name: "Document Processor",
-    description: "Extracts structured data from unstructured documents",
-    status: "paused",
-    type: "claude",
-    usage: 45,
-    accuracy: 88,
-    lastRun: "3 hours ago",
-    starred: false
+    name: "Content Generator",
+    description: "Generates marketing content based on keywords",
+    status: "error",
+    type: "Generation",
+    model: "Bard",
+    cost: 0.01,
+    successRate: 88,
+    avgProcessingTime: 1.5
   },
   {
     id: "agent-4",
-    name: "Entity Recognizer",
-    description: "Identifies and extracts named entities from text data",
+    name: "Image Classifier",
+    description: "Classifies images based on content",
     status: "active",
-    type: "claude",
-    usage: 73,
-    accuracy: 94,
-    lastRun: "18 minutes ago",
-    starred: false
-  },
-  {
-    id: "agent-5",
-    name: "Sentiment Analyzer",
-    description: "Analyzes sentiment in customer feedback and comments",
-    status: "processing",
-    type: "claude",
-    usage: 56,
-    accuracy: 87,
-    lastRun: "5 minutes ago",
-    starred: false
-  },
-  {
-    id: "agent-6",
-    name: "Data Validator",
-    description: "Validates data schema and quality before processing",
-    status: "error",
-    type: "claude",
-    usage: 23,
-    accuracy: 99,
-    lastRun: "2 hours ago",
-    starred: false
+    type: "Classification",
+    model: "Vision API",
+    cost: 0.005,
+    successRate: 97,
+    avgProcessingTime: 0.7
   }
 ];
 
-function AgentCard({ agent }: { agent: typeof agents[0] }) {
-  return (
-    <Card className="overflow-hidden">
-      <CardHeader className="pb-3">
-        <div className="flex justify-between items-start">
-          <div className="flex items-center gap-2">
-            <div className={`w-2 h-2 rounded-full ${
-              agent.status === 'active' ? 'bg-green-500' :
-              agent.status === 'paused' ? 'bg-yellow-500' :
-              agent.status === 'processing' ? 'bg-blue-500 animate-pulse-slow' :
-              'bg-red-500'
-            }`} />
-            <CardTitle className="text-lg">{agent.name}</CardTitle>
-            {agent.starred && <Star className="h-4 w-4 fill-yellow-400 text-yellow-400" />}
-          </div>
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="ghost" size="icon">
-                <MoreVertical className="h-4 w-4" />
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end">
-              <DropdownMenuItem>View Details</DropdownMenuItem>
-              <DropdownMenuItem>Edit Configuration</DropdownMenuItem>
-              <DropdownMenuItem>View Logs</DropdownMenuItem>
-              <DropdownMenuSeparator />
-              {agent.status === 'active' ? (
-                <DropdownMenuItem>Pause Agent</DropdownMenuItem>
-              ) : (
-                <DropdownMenuItem>Start Agent</DropdownMenuItem>
-              )}
-              <DropdownMenuItem className="text-red-500">Delete Agent</DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
-        </div>
-        <div className="flex items-center gap-2 mt-1">
-          <Badge
-            variant="outline"
-            className="bg-purple-50 text-purple-800 border-purple-200"
-          >
-            Claude Sonnet 3.7
-          </Badge>
-          <Badge
-            variant="outline"
-            className={`
-              ${agent.status === 'active' ? 'bg-green-50 text-green-800 border-green-200' : 
-                agent.status === 'paused' ? 'bg-yellow-50 text-yellow-800 border-yellow-200' :
-                agent.status === 'processing' ? 'bg-blue-50 text-blue-800 border-blue-200' :
-                'bg-red-50 text-red-800 border-red-200'
-              }
-            `}
-          >
-            {agent.status.charAt(0).toUpperCase() + agent.status.slice(1)}
-          </Badge>
-        </div>
-        <CardDescription className="mt-2">
-          {agent.description}
-        </CardDescription>
-      </CardHeader>
-      <CardContent className="pb-3">
-        <div className="space-y-2">
-          <div className="flex items-center justify-between">
-            <span className="text-sm">Resource Usage</span>
-            <span className="text-sm font-medium">{agent.usage}%</span>
-          </div>
-          <Progress value={agent.usage} className="h-1" />
-        </div>
-        <div className="space-y-2 mt-4">
-          <div className="flex items-center justify-between">
-            <span className="text-sm">Accuracy</span>
-            <span className="text-sm font-medium">{agent.accuracy}%</span>
-          </div>
-          <Progress value={agent.accuracy} className="h-1" />
-        </div>
-        <div className="text-sm text-muted-foreground mt-4">
-          Last run: {agent.lastRun}
-        </div>
-      </CardContent>
-      <CardFooter className="pt-0">
-        <div className="flex w-full gap-2">
-          {agent.status === 'active' ? (
-            <Button variant="outline" size="sm" className="flex-1">
-              <Pause className="h-4 w-4 mr-2" /> Pause
-            </Button>
-          ) : (
-            <Button variant="outline" size="sm" className="flex-1">
-              <Play className="h-4 w-4 mr-2" /> Start
-            </Button>
-          )}
-          <Button variant="outline" size="sm" className="flex-1">
-            <RefreshCcw className="h-4 w-4 mr-2" /> Reset
-          </Button>
-        </div>
-      </CardFooter>
-    </Card>
-  );
-}
-
 const Agents = () => {
+  const [agents, setAgents] = useState(initialAgents);
+  const [selectedAgent, setSelectedAgent] = useState(null);
+  const [isEditing, setIsEditing] = useState(false);
+  const [newAgent, setNewAgent] = useState({
+    id: "",
+    name: "",
+    description: "",
+    status: "idle",
+    type: "",
+    model: "",
+    cost: 0,
+    successRate: 0,
+    avgProcessingTime: 0
+  });
+
+  const handleAgentSelect = (agent) => {
+    setSelectedAgent(agent);
+    setIsEditing(false);
+  };
+
+  const handleEditAgent = () => {
+    setIsEditing(true);
+    setNewAgent({ ...selectedAgent });
+  };
+
+  const handleCancelEdit = () => {
+    setIsEditing(false);
+    setNewAgent({
+      id: "",
+      name: "",
+      description: "",
+      status: "idle",
+      type: "",
+      model: "",
+      cost: 0,
+      successRate: 0,
+      avgProcessingTime: 0
+    });
+  };
+
+  const handleSaveAgent = () => {
+    const updatedAgents = agents.map(agent =>
+      agent.id === newAgent.id ? newAgent : agent
+    );
+    setAgents(updatedAgents);
+    setSelectedAgent(newAgent);
+    setIsEditing(false);
+  };
+
+  const handleDeleteAgent = (agentId) => {
+    const updatedAgents = agents.filter(agent => agent.id !== agentId);
+    setAgents(updatedAgents);
+    setSelectedAgent(null);
+  };
+
+  const handleInputChange = (e) => {
+    const { name, value } = e.target;
+    setNewAgent(prevState => ({
+      ...prevState,
+      [name]: value
+    }));
+  };
+  
+  const handleStatusChange = (agentId, newStatus) => {
+    const updatedAgents = agents.map(agent =>
+      agent.id === agentId ? { ...agent, status: newStatus } : agent
+    );
+    setAgents(updatedAgents);
+    setSelectedAgent(prevAgent =>
+      prevAgent && prevAgent.id === agentId ? { ...prevAgent, status: newStatus } : prevAgent
+    );
+  };
+
   return (
     <SidebarWrapper>
-      <div className="flex flex-col min-h-screen">
-        <Header title="AI Agents" />
+      <div className="flex flex-col min-h-screen bg-white">
+        <Header title="Agents IA" />
         <div className="flex-1 p-6">
           <div className="flex justify-between items-center mb-6">
             <div>
-              <h1 className="text-2xl font-bold tracking-tight">AI Agents</h1>
+              <h1 className="text-2xl font-bold tracking-tight">AI Agent Management</h1>
               <p className="text-muted-foreground">
-                Manage and monitor your intelligent agents
+                Manage and monitor your AI agents
               </p>
             </div>
-            <div className="flex items-center gap-4">
-              <div className="relative">
-                <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-                <input
-                  type="search"
-                  placeholder="Search agents..."
-                  className="rounded-md border border-input bg-background pl-8 pr-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 w-64"
-                />
-              </div>
+            <div className="flex items-center gap-2">
               <Button>
-                <Brain className="mr-2 h-4 w-4" /> Create Agent
+                <Plus className="h-4 w-4 mr-2" /> New Agent
               </Button>
             </div>
           </div>
 
-          <Tabs defaultValue="all">
-            <div className="flex justify-between items-center mb-4">
-              <TabsList>
-                <TabsTrigger value="all">All Agents (6)</TabsTrigger>
-                <TabsTrigger value="active">Active (3)</TabsTrigger>
-                <TabsTrigger value="paused">Paused (1)</TabsTrigger>
-                <TabsTrigger value="error">Error (1)</TabsTrigger>
-                <TabsTrigger value="starred">Starred (2)</TabsTrigger>
-              </TabsList>
-              <Button variant="outline" size="sm">
-                <Settings className="mr-2 h-4 w-4" />
-                Configure
-              </Button>
+          <div className="grid grid-cols-1 md:grid-cols-12 gap-6">
+            <div className="md:col-span-4">
+              <Card>
+                <CardHeader>
+                  <CardTitle>Agent List</CardTitle>
+                  <CardDescription>
+                    Select an agent to view details
+                  </CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-2">
+                  {agents.map(agent => (
+                    <Button
+                      key={agent.id}
+                      variant="outline"
+                      className={`w-full justify-between ${selectedAgent?.id === agent.id ? 'bg-secondary text-secondary-foreground hover:bg-secondary/80' : ''}`}
+                      onClick={() => handleAgentSelect(agent)}
+                    >
+                      {agent.name}
+                      {selectedAgent?.id === agent.id && <ArrowRight className="h-4 w-4" />}
+                    </Button>
+                  ))}
+                </CardContent>
+              </Card>
             </div>
 
-            <TabsContent value="all" className="mt-0">
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                {agents.map(agent => (
-                  <AgentCard key={agent.id} agent={agent} />
-                ))}
-              </div>
-            </TabsContent>
-            
-            <TabsContent value="active" className="mt-0">
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                {agents.filter(a => a.status === 'active').map(agent => (
-                  <AgentCard key={agent.id} agent={agent} />
-                ))}
-              </div>
-            </TabsContent>
-            
-            <TabsContent value="paused" className="mt-0">
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                {agents.filter(a => a.status === 'paused').map(agent => (
-                  <AgentCard key={agent.id} agent={agent} />
-                ))}
-              </div>
-            </TabsContent>
-            
-            <TabsContent value="error" className="mt-0">
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                {agents.filter(a => a.status === 'error').map(agent => (
-                  <AgentCard key={agent.id} agent={agent} />
-                ))}
-              </div>
-            </TabsContent>
-            
-            <TabsContent value="starred" className="mt-0">
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                {agents.filter(a => a.starred).map(agent => (
-                  <AgentCard key={agent.id} agent={agent} />
-                ))}
-              </div>
-            </TabsContent>
-          </Tabs>
+            <div className="md:col-span-8">
+              {selectedAgent ? (
+                <Card>
+                  <CardHeader>
+                    <div className="flex justify-between items-center">
+                      <CardTitle>{isEditing ? `Edit ${newAgent.name}` : selectedAgent.name}</CardTitle>
+                      <div>
+                        {isEditing ? (
+                          <div className="flex gap-2">
+                            <Button variant="ghost" onClick={handleCancelEdit}>Cancel</Button>
+                            <Button onClick={handleSaveAgent}>Save</Button>
+                          </div>
+                        ) : (
+                          <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                              <Button variant="ghost" size="icon">
+                                <MoreVertical className="h-4 w-4" />
+                              </Button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent align="end">
+                              <DropdownMenuItem onClick={handleEditAgent}>
+                                <Edit className="h-4 w-4 mr-2" /> Edit
+                              </DropdownMenuItem>
+                              <DropdownMenuItem>
+                                <Copy className="h-4 w-4 mr-2" /> Clone
+                              </DropdownMenuItem>
+                              <DropdownMenuSeparator />
+                              <DropdownMenuItem className="text-red-500" onClick={() => handleDeleteAgent(selectedAgent.id)}>
+                                <Trash2 className="h-4 w-4 mr-2" /> Delete
+                              </DropdownMenuItem>
+                            </DropdownMenuContent>
+                          </DropdownMenu>
+                        )}
+                      </div>
+                    </div>
+                  </CardHeader>
+                  <CardContent>
+                    {isEditing ? (
+                      <div className="grid gap-4">
+                        <div>
+                          <Label htmlFor="name">Name</Label>
+                          <Input type="text" id="name" name="name" value={newAgent.name} onChange={handleInputChange} />
+                        </div>
+                        <div>
+                          <Label htmlFor="description">Description</Label>
+                          <Textarea id="description" name="description" value={newAgent.description} onChange={handleInputChange} />
+                        </div>
+                        <div>
+                          <Label htmlFor="type">Type</Label>
+                          <Input type="text" id="type" name="type" value={newAgent.type} onChange={handleInputChange} />
+                        </div>
+                        <div>
+                          <Label htmlFor="model">Model</Label>
+                          <Input type="text" id="model" name="model" value={newAgent.model} onChange={handleInputChange} />
+                        </div>
+                        <div className="grid grid-cols-2 gap-4">
+                          <div>
+                            <Label htmlFor="cost">Cost per Operation</Label>
+                            <Input type="number" id="cost" name="cost" value={newAgent.cost} onChange={handleInputChange} />
+                          </div>
+                          <div>
+                            <Label htmlFor="successRate">Success Rate (%)</Label>
+                            <Input type="number" id="successRate" name="successRate" value={newAgent.successRate} onChange={handleInputChange} />
+                          </div>
+                        </div>
+                        <div>
+                          <Label htmlFor="avgProcessingTime">Avg. Processing Time (seconds)</Label>
+                          <Input type="number" id="avgProcessingTime" name="avgProcessingTime" value={newAgent.avgProcessingTime} onChange={handleInputChange} />
+                        </div>
+                      </div>
+                    ) : (
+                      <div className="space-y-4">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                          <div>
+                            <p className="text-sm font-medium">Description</p>
+                            <p className="text-muted-foreground">{selectedAgent.description}</p>
+                          </div>
+                          <div>
+                            <p className="text-sm font-medium">Type</p>
+                            <p className="text-muted-foreground">{selectedAgent.type}</p>
+                          </div>
+                          <div>
+                            <p className="text-sm font-medium">Model</p>
+                            <p className="text-muted-foreground">{selectedAgent.model}</p>
+                          </div>
+                          <div>
+                            <p className="text-sm font-medium">Cost per Operation</p>
+                            <p className="text-muted-foreground">${selectedAgent.cost}</p>
+                          </div>
+                          <div>
+                            <p className="text-sm font-medium">Success Rate</p>
+                            <p className="text-muted-foreground">{selectedAgent.successRate}%</p>
+                          </div>
+                          <div>
+                            <p className="text-sm font-medium">Avg. Processing Time</p>
+                            <p className="text-muted-foreground">{selectedAgent.avgProcessingTime}s</p>
+                          </div>
+                        </div>
+                        <div>
+                          <div className="flex items-center justify-between">
+                            <p className="text-sm font-medium">Status</p>
+                            <Select value={selectedAgent.status} onValueChange={(value) => handleStatusChange(selectedAgent.id, value)}>
+                              <SelectTrigger className="w-[180px]">
+                                <SelectValue placeholder="Select a status" />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="active">Active</SelectItem>
+                                <SelectItem value="idle">Idle</SelectItem>
+                                <SelectItem value="error">Error</SelectItem>
+                              </SelectContent>
+                            </Select>
+                          </div>
+                        </div>
+                      </div>
+                    )}
+                  </CardContent>
+                </Card>
+              ) : (
+                <Card>
+                  <CardContent className="py-8 flex items-center justify-center">
+                    <p className="text-muted-foreground">Select an agent to view details.</p>
+                  </CardContent>
+                </Card>
+              )}
+            </div>
+          </div>
         </div>
       </div>
     </SidebarWrapper>

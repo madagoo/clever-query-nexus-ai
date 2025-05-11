@@ -1,4 +1,3 @@
-
 import Header from "@/components/layout/Header";
 import SidebarWrapper from "@/components/layout/Sidebar";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
@@ -184,7 +183,7 @@ function DataSourceCard({ source }: { source: typeof dataSources[0] }) {
 const Sources = () => {
   return (
     <SidebarWrapper>
-      <div className="flex flex-col min-h-screen">
+      <div className="flex flex-col min-h-screen bg-white">
         <Header title="Connected Sources" />
         <div className="flex-1 p-6">
           <div className="flex justify-between items-center mb-6">
