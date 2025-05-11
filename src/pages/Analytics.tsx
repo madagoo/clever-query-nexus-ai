@@ -1,6 +1,4 @@
-
 import Header from "@/components/layout/Header";
-import SidebarWrapper from "@/components/layout/Sidebar";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { LineChart, Line, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from "recharts";
 
@@ -52,58 +50,56 @@ const usageData = [
 
 const Analytics = () => {
   return (
-    <SidebarWrapper>
-      <div className="flex flex-col min-h-screen">
-        <Header title="Analytics" />
-        <div className="flex-1 p-6 space-y-6">
-          <h2 className="text-2xl font-bold">Vue d'ensemble des performances</h2>
+    <div className="flex flex-col min-h-screen">
+      <Header title="Analytics" />
+      <div className="flex-1 p-6 space-y-6">
+        <h2 className="text-2xl font-bold">Vue d'ensemble des performances</h2>
+        
+        <div className="grid gap-6 grid-cols-1 md:grid-cols-2">
+          <Card>
+            <CardHeader>
+              <CardTitle>Performance des agents et workflows</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="h-80">
+                <ResponsiveContainer width="100%" height="100%">
+                  <LineChart data={analyticsData}>
+                    <CartesianGrid strokeDasharray="3 3" />
+                    <XAxis dataKey="name" />
+                    <YAxis />
+                    <Tooltip />
+                    <Legend />
+                    <Line type="monotone" dataKey="agents" stroke="#8884d8" activeDot={{ r: 8 }} />
+                    <Line type="monotone" dataKey="workflows" stroke="#82ca9d" />
+                    <Line type="monotone" dataKey="data" stroke="#ffc658" />
+                  </LineChart>
+                </ResponsiveContainer>
+              </div>
+            </CardContent>
+          </Card>
           
-          <div className="grid gap-6 grid-cols-1 md:grid-cols-2">
-            <Card>
-              <CardHeader>
-                <CardTitle>Performance des agents et workflows</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="h-80">
-                  <ResponsiveContainer width="100%" height="100%">
-                    <LineChart data={analyticsData}>
-                      <CartesianGrid strokeDasharray="3 3" />
-                      <XAxis dataKey="name" />
-                      <YAxis />
-                      <Tooltip />
-                      <Legend />
-                      <Line type="monotone" dataKey="agents" stroke="#8884d8" activeDot={{ r: 8 }} />
-                      <Line type="monotone" dataKey="workflows" stroke="#82ca9d" />
-                      <Line type="monotone" dataKey="data" stroke="#ffc658" />
-                    </LineChart>
-                  </ResponsiveContainer>
-                </div>
-              </CardContent>
-            </Card>
-            
-            <Card>
-              <CardHeader>
-                <CardTitle>Répartition des usages</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="h-80">
-                  <ResponsiveContainer width="100%" height="100%">
-                    <BarChart data={usageData}>
-                      <CartesianGrid strokeDasharray="3 3" />
-                      <XAxis dataKey="name" />
-                      <YAxis />
-                      <Tooltip />
-                      <Legend />
-                      <Bar dataKey="value" fill="#8884d8" />
-                    </BarChart>
-                  </ResponsiveContainer>
-                </div>
-              </CardContent>
-            </Card>
-          </div>
+          <Card>
+            <CardHeader>
+              <CardTitle>Répartition des usages</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="h-80">
+                <ResponsiveContainer width="100%" height="100%">
+                  <BarChart data={usageData}>
+                    <CartesianGrid strokeDasharray="3 3" />
+                    <XAxis dataKey="name" />
+                    <YAxis />
+                    <Tooltip />
+                    <Legend />
+                    <Bar dataKey="value" fill="#8884d8" />
+                  </BarChart>
+                </ResponsiveContainer>
+              </div>
+            </CardContent>
+          </Card>
         </div>
       </div>
-    </SidebarWrapper>
+    </div>
   );
 };
 

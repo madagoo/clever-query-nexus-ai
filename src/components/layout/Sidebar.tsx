@@ -150,7 +150,7 @@ export default function SidebarWrapper({ children }: { children: React.ReactNode
   // Si l'utilisateur est admin, afficher avec la sidebar
   if (isAuthenticated && userRole === 'admin') {
     return (
-      <div className="min-h-screen flex w-full">
+      <div className="min-h-screen flex">
         <AppSidebar />
         <main className="flex-1">{children}</main>
       </div>
