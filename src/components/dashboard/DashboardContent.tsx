@@ -7,7 +7,7 @@ import AIPerformance from "@/components/dashboard/AIPerformance";
 
 export default function DashboardContent() {
   return (
-    <div className="flex-1 px-0 py-6">
+    <div className="flex-1 px-6 py-6">
       <StatCards />
 
       <div className="grid gap-4 grid-cols-1 md:grid-cols-4 mt-6">
