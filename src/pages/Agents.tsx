@@ -158,7 +158,7 @@ const Agents = () => {
 
   return (
     <SidebarWrapper>
-      <div className="flex flex-col min-h-screen bg-white">
+      <div className="flex flex-col min-h-screen">
         <Header title="Agents IA" />
         <div className="flex-1 p-6">
           <div className="flex justify-between items-center mb-6">
