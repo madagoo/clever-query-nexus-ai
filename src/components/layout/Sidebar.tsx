@@ -152,7 +152,7 @@ export default function SidebarWrapper({ children }: { children: React.ReactNode
     return (
       <div className="flex min-h-screen bg-background">
         <AppSidebar />
-        <main className="flex-1">{children}</main>
+        <main className="flex-1 flex flex-col">{children}</main>
       </div>
     );
   }
