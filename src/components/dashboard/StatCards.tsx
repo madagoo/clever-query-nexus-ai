@@ -5,13 +5,14 @@ import {
   Clock, 
   Database, 
   Server, 
+  LucideIcon 
 } from "lucide-react";
 
 interface StatCardItem {
   title: string;
   value: string;
   description: string;
-  icon: React.ElementType;
+  icon: LucideIcon;
   trend: {
     value: number;
     isPositive: boolean;
