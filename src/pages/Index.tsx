@@ -17,7 +17,7 @@ import {
 const Index = () => {
   return (
     <SidebarWrapper>
-      <div className="flex flex-col min-h-screen bg-white">
+      <div className="flex flex-col min-h-screen">
         <Header title="Dashboard" />
         <div className="flex-1 p-6 space-y-6">
           <div className="grid gap-4 sm:grid-cols-2 md:grid-cols-4">
