@@ -88,7 +88,7 @@ const authItems = [
 
 export function AppSidebar() {
   return (
-    <ShadcnSidebar>
+    <ShadcnSidebar className="border-r-0">
       <div className="p-4 flex items-center justify-center">
         <Link to="/" className="text-xl font-bold text-white">AI DataFlow</Link>
       </div>
@@ -147,16 +147,16 @@ export function AppSidebar() {
 export default function SidebarWrapper({ children }: { children: React.ReactNode }) {
   const { isAuthenticated, userRole } = useAuth();
   
-  // Si l'utilisateur est admin, afficher avec la sidebar
+  // Si l'utilisateur est admin, afficher avec la sidebar sans espace
   if (isAuthenticated && userRole === 'admin') {
     return (
-      <div className="min-h-screen flex">
+      <div className="flex min-h-screen">
         <AppSidebar />
-        <main className="flex-1">{children}</main>
+        <main className="flex-1 bg-white">{children}</main>
       </div>
     );
   }
   
-  // Sinon, afficher sans sidebar mais avec une classe pour centrer
+  // Sinon, afficher sans sidebar
   return <div className="min-h-screen w-full">{children}</div>;
 }
