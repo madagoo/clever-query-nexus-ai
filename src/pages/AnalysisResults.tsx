@@ -32,7 +32,7 @@ const AnalysisResults = () => {
   };
 
   return (
-    <div className="flex flex-col min-h-screen">
+    <div className="flex flex-col h-full">
       <Header title="Résultats d'Analyse" />
       <div className="flex-1 p-4 container mx-auto">
         <div className="flex flex-wrap items-center justify-between mb-6">
