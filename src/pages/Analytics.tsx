@@ -1,3 +1,4 @@
+
 import Header from "@/components/layout/Header";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { LineChart, Line, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from "recharts";
@@ -50,7 +51,7 @@ const usageData = [
 
 const Analytics = () => {
   return (
-    <div className="flex flex-col h-full">
+    <div className="flex flex-col h-full bg-white">
       <Header title="Analytics" />
       <div className="flex-1 p-6 space-y-6">
         <h2 className="text-2xl font-bold">Vue d'ensemble des performances</h2>
