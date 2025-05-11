@@ -150,13 +150,13 @@ export default function SidebarWrapper({ children }: { children: React.ReactNode
   // Si l'utilisateur est admin, afficher avec la sidebar sans espace
   if (isAuthenticated && userRole === 'admin') {
     return (
-      <div className="flex min-h-screen">
+      <div className="flex min-h-screen bg-background">
         <AppSidebar />
-        <main className="flex-1">{children}</main>
+        <main className="flex-1 p-0">{children}</main>
       </div>
     );
   }
   
   // Sinon, afficher sans sidebar
-  return <div className="min-h-screen w-full bg-white">{children}</div>;
+  return <div className="min-h-screen w-full">{children}</div>;
 }
