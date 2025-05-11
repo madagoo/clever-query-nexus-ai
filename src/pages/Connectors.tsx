@@ -1,3 +1,4 @@
+
 import Header from "@/components/layout/Header";
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
@@ -477,10 +478,11 @@ const Connectors = () => {
                                 <SelectItem value="oracle">Oracle</SelectItem>
                                 <SelectItem value="sqlserver">SQL Server</SelectItem>
                               </SelectContent>
-                              <FormMessage />
-                            </FormItem>
-                          )}
-                        />
+                            </Select>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
 
                       <div className="grid grid-cols-2 gap-4">
                         <FormField
@@ -633,10 +635,11 @@ const Connectors = () => {
                                 <SelectItem value="smb">SMB/CIFS (Windows)</SelectItem>
                                 <SelectItem value="nfs">NFS</SelectItem>
                               </SelectContent>
-                              <FormMessage />
-                            </FormItem>
-                          )}
-                        />
+                            </Select>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
 
                       <div className="grid grid-cols-2 gap-4">
                         <FormField
@@ -942,3 +945,228 @@ const Connectors = () => {
                         <span className="text-sm font-medium text-gray-500">Hôte:</span>
                         <span className="text-sm">{connector.host}</span>
                       </div>
+                      <div className="flex items-center gap-2 mb-1">
+                        <span className="text-sm font-medium text-gray-500">Type:</span>
+                        <span className="text-sm">{connector.vendor}</span>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <span className="text-sm font-medium text-gray-500">Dernière synchro:</span>
+                        <span className="text-sm">{connector.lastSync}</span>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          </TabsContent>
+
+          <TabsContent value="database">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              {/* Filtrer seulement les bases de données */}
+              {[
+                {
+                  id: "connector-1",
+                  name: "PostgreSQL Production",
+                  type: "database",
+                  vendor: "PostgreSQL",
+                  host: "db.example.com",
+                  status: "connected",
+                  lastSync: "5 minutes ago",
+                  icon: <Database className="h-12 w-12 text-blue-500" />
+                },
+                {
+                  id: "connector-2",
+                  name: "MongoDB Analytics",
+                  type: "database",
+                  vendor: "MongoDB",
+                  host: "mongo.example.com",
+                  status: "connected",
+                  lastSync: "10 minutes ago",
+                  icon: <Database className="h-12 w-12 text-green-500" />
+                },
+                {
+                  id: "connector-3",
+                  name: "MySQL Legacy",
+                  type: "database",
+                  vendor: "MySQL",
+                  host: "mysql.internal",
+                  status: "error",
+                  lastSync: "Failed 30 minutes ago",
+                  icon: <Database className="h-12 w-12 text-orange-500" />
+                },
+                {
+                  id: "connector-4",
+                  name: "ElasticSearch",
+                  type: "database",
+                  vendor: "Elasticsearch",
+                  host: "elastic.example.com",
+                  status: "connected",
+                  lastSync: "15 minutes ago",
+                  icon: <Database className="h-12 w-12 text-yellow-500" />
+                },
+                {
+                  id: "connector-8",
+                  name: "Oracle Finance",
+                  type: "database",
+                  vendor: "Oracle",
+                  host: "oracle.example.com",
+                  status: "connected",
+                  lastSync: "1 heure ago",
+                  icon: <Database className="h-12 w-12 text-red-500" />
+                },
+                {
+                  id: "connector-9",
+                  name: "SQL Server HR",
+                  type: "database",
+                  vendor: "SQL Server",
+                  host: "sqlserver.example.com",
+                  status: "connected",
+                  lastSync: "45 minutes ago",
+                  icon: <Database className="h-12 w-12 text-blue-700" />
+                }
+              ].map(connector => (
+                <Card key={connector.id}>
+                  <CardHeader className="pb-2">
+                    <div className="flex justify-between items-start">
+                      <CardTitle className="text-lg">{connector.name}</CardTitle>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <Badge
+                        variant="outline"
+                        className="bg-blue-50 text-blue-800 border-blue-200"
+                      >
+                        Base de données
+                      </Badge>
+                      <Badge
+                        variant="outline"
+                        className={`
+                          ${connector.status === 'connected' ? 'bg-green-50 text-green-800 border-green-200' : 
+                            connector.status === 'pending' ? 'bg-yellow-50 text-yellow-800 border-yellow-200' :
+                            'bg-red-50 text-red-800 border-red-200'
+                          }
+                        `}
+                      >
+                        {connector.status === 'connected' ? 'Connecté' : 
+                         connector.status === 'pending' ? 'En attente' : 'Erreur'}
+                      </Badge>
+                    </div>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="flex flex-col">
+                      <div className="flex items-center gap-2 mb-1">
+                        <span className="text-sm font-medium text-gray-500">Hôte:</span>
+                        <span className="text-sm">{connector.host}</span>
+                      </div>
+                      <div className="flex items-center gap-2 mb-1">
+                        <span className="text-sm font-medium text-gray-500">Type:</span>
+                        <span className="text-sm">{connector.vendor}</span>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <span className="text-sm font-medium text-gray-500">Dernière synchro:</span>
+                        <span className="text-sm">{connector.lastSync}</span>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          </TabsContent>
+
+          <TabsContent value="file">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              {/* Filtrer seulement les fichiers */}
+              {[
+                {
+                  id: "connector-5",
+                  name: "Fichiers SFTP",
+                  type: "file",
+                  vendor: "SFTP",
+                  host: "sftp.example.com",
+                  status: "connected",
+                  lastSync: "20 minutes ago",
+                  icon: <FileType2 className="h-12 w-12 text-purple-500" />
+                },
+                {
+                  id: "connector-6",
+                  name: "Amazon S3",
+                  type: "file",
+                  vendor: "S3",
+                  host: "s3.amazonaws.com",
+                  status: "connected",
+                  lastSync: "5 minutes ago",
+                  icon: <FileType2 className="h-12 w-12 text-indigo-500" />
+                },
+                {
+                  id: "connector-7",
+                  name: "Google Cloud Storage",
+                  type: "file",
+                  vendor: "GCS",
+                  host: "storage.googleapis.com",
+                  status: "pending",
+                  lastSync: "Jamais",
+                  icon: <FileType2 className="h-12 w-12 text-blue-500" />
+                },
+                {
+                  id: "connector-10",
+                  name: "Partage Windows SMB",
+                  type: "file",
+                  vendor: "SMB",
+                  host: "\\\\server\\share",
+                  status: "error",
+                  lastSync: "Failed 2 heures ago",
+                  icon: <FileType2 className="h-12 w-12 text-teal-500" />
+                }
+              ].map(connector => (
+                <Card key={connector.id}>
+                  <CardHeader className="pb-2">
+                    <div className="flex justify-between items-start">
+                      <CardTitle className="text-lg">{connector.name}</CardTitle>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <Badge
+                        variant="outline"
+                        className="bg-purple-50 text-purple-800 border-purple-200"
+                      >
+                        Fichiers
+                      </Badge>
+                      <Badge
+                        variant="outline"
+                        className={`
+                          ${connector.status === 'connected' ? 'bg-green-50 text-green-800 border-green-200' : 
+                            connector.status === 'pending' ? 'bg-yellow-50 text-yellow-800 border-yellow-200' :
+                            'bg-red-50 text-red-800 border-red-200'
+                          }
+                        `}
+                      >
+                        {connector.status === 'connected' ? 'Connecté' : 
+                         connector.status === 'pending' ? 'En attente' : 'Erreur'}
+                      </Badge>
+                    </div>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="flex flex-col">
+                      <div className="flex items-center gap-2 mb-1">
+                        <span className="text-sm font-medium text-gray-500">Hôte:</span>
+                        <span className="text-sm">{connector.host}</span>
+                      </div>
+                      <div className="flex items-center gap-2 mb-1">
+                        <span className="text-sm font-medium text-gray-500">Type:</span>
+                        <span className="text-sm">{connector.vendor}</span>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <span className="text-sm font-medium text-gray-500">Dernière synchro:</span>
+                        <span className="text-sm">{connector.lastSync}</span>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          </TabsContent>
+        </Tabs>
+      </div>
+    </div>
+  );
+};
+
+export default Connectors;
