@@ -215,129 +215,127 @@ function WorkflowCard({ workflow }: { workflow: typeof workflows[0] }) {
 
 const Workflows = () => {
   return (
-    <SidebarWrapper>
-      <div className="flex flex-col min-h-screen bg-white">
-        <Header title="Workflows" />
-        <div className="flex-1 p-6">
-          <div className="flex justify-between items-center mb-6">
-            <div>
-              <h1 className="text-2xl font-bold tracking-tight">Workflow Management</h1>
-              <p className="text-muted-foreground">
-                Orchestrate data processing pipelines with Temporal/Prefect
-              </p>
-            </div>
-            <div className="flex items-center gap-2">
-              <Button variant="outline">
-                <Calendar className="h-4 w-4 mr-2" /> Schedule
-              </Button>
-              <Button variant="outline">
-                <BarChart className="h-4 w-4 mr-2" /> Analytics
-              </Button>
-              <Button>
-                <Plus className="h-4 w-4 mr-2" /> New Workflow
-              </Button>
-            </div>
+    <div className="flex flex-col min-h-screen bg-white">
+      <Header title="Workflows" />
+      <div className="flex-1 p-6">
+        <div className="flex justify-between items-center mb-6">
+          <div>
+            <h1 className="text-2xl font-bold tracking-tight">Workflow Management</h1>
+            <p className="text-muted-foreground">
+              Orchestrate data processing pipelines with Temporal/Prefect
+            </p>
           </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-12 gap-6 mb-6">
-            <Card className="md:col-span-4 bg-blue-50">
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <CheckCircle className="h-5 w-5 text-green-600" />
-                  <span>Completed</span>
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="text-3xl font-bold">2</div>
-                <p className="text-sm text-muted-foreground">
-                  Successfully completed in last 24 hours
-                </p>
-              </CardContent>
-            </Card>
-            <Card className="md:col-span-4 bg-blue-50">
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Clock className="h-5 w-5 text-blue-600" />
-                  <span>Scheduled</span>
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="text-3xl font-bold">2</div>
-                <p className="text-sm text-muted-foreground">
-                  Workflows scheduled for execution
-                </p>
-              </CardContent>
-            </Card>
-            <Card className="md:col-span-4 bg-blue-50">
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <AlertCircle className="h-5 w-5 text-red-600" />
-                  <span>Failed</span>
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="text-3xl font-bold">1</div>
-                <p className="text-sm text-muted-foreground">
-                  Workflows that failed in last 24 hours
-                </p>
-              </CardContent>
-            </Card>
+          <div className="flex items-center gap-2">
+            <Button variant="outline">
+              <Calendar className="h-4 w-4 mr-2" /> Schedule
+            </Button>
+            <Button variant="outline">
+              <BarChart className="h-4 w-4 mr-2" /> Analytics
+            </Button>
+            <Button>
+              <Plus className="h-4 w-4 mr-2" /> New Workflow
+            </Button>
           </div>
-
-          <Tabs defaultValue="all">
-            <div className="flex justify-between items-center mb-4">
-              <TabsList>
-                <TabsTrigger value="all">All Workflows (6)</TabsTrigger>
-                <TabsTrigger value="running">Running (1)</TabsTrigger>
-                <TabsTrigger value="scheduled">Scheduled (2)</TabsTrigger>
-                <TabsTrigger value="completed">Completed (2)</TabsTrigger>
-                <TabsTrigger value="failed">Failed (1)</TabsTrigger>
-              </TabsList>
-            </div>
-
-            <TabsContent value="all" className="mt-0">
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                {workflows.map(workflow => (
-                  <WorkflowCard key={workflow.id} workflow={workflow} />
-                ))}
-              </div>
-            </TabsContent>
-            
-            <TabsContent value="running" className="mt-0">
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                {workflows.filter(w => w.status === 'running').map(workflow => (
-                  <WorkflowCard key={workflow.id} workflow={workflow} />
-                ))}
-              </div>
-            </TabsContent>
-            
-            <TabsContent value="scheduled" className="mt-0">
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                {workflows.filter(w => w.status === 'scheduled').map(workflow => (
-                  <WorkflowCard key={workflow.id} workflow={workflow} />
-                ))}
-              </div>
-            </TabsContent>
-            
-            <TabsContent value="completed" className="mt-0">
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                {workflows.filter(w => w.status === 'success').map(workflow => (
-                  <WorkflowCard key={workflow.id} workflow={workflow} />
-                ))}
-              </div>
-            </TabsContent>
-            
-            <TabsContent value="failed" className="mt-0">
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                {workflows.filter(w => w.status === 'failed').map(workflow => (
-                  <WorkflowCard key={workflow.id} workflow={workflow} />
-                ))}
-              </div>
-            </TabsContent>
-          </Tabs>
         </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-12 gap-6 mb-6">
+          <Card className="md:col-span-4 bg-blue-50">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <CheckCircle className="h-5 w-5 text-green-600" />
+                <span>Completed</span>
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="text-3xl font-bold">2</div>
+              <p className="text-sm text-muted-foreground">
+                Successfully completed in last 24 hours
+              </p>
+            </CardContent>
+          </Card>
+          <Card className="md:col-span-4 bg-blue-50">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Clock className="h-5 w-5 text-blue-600" />
+                <span>Scheduled</span>
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="text-3xl font-bold">2</div>
+              <p className="text-sm text-muted-foreground">
+                Workflows scheduled for execution
+              </p>
+            </CardContent>
+          </Card>
+          <Card className="md:col-span-4 bg-blue-50">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <AlertCircle className="h-5 w-5 text-red-600" />
+                <span>Failed</span>
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="text-3xl font-bold">1</div>
+              <p className="text-sm text-muted-foreground">
+                Workflows that failed in last 24 hours
+              </p>
+            </CardContent>
+          </Card>
+        </div>
+
+        <Tabs defaultValue="all">
+          <div className="flex justify-between items-center mb-4">
+            <TabsList>
+              <TabsTrigger value="all">All Workflows (6)</TabsTrigger>
+              <TabsTrigger value="running">Running (1)</TabsTrigger>
+              <TabsTrigger value="scheduled">Scheduled (2)</TabsTrigger>
+              <TabsTrigger value="completed">Completed (2)</TabsTrigger>
+              <TabsTrigger value="failed">Failed (1)</TabsTrigger>
+            </TabsList>
+          </div>
+
+          <TabsContent value="all" className="mt-0">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              {workflows.map(workflow => (
+                <WorkflowCard key={workflow.id} workflow={workflow} />
+              ))}
+            </div>
+          </TabsContent>
+          
+          <TabsContent value="running" className="mt-0">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              {workflows.filter(w => w.status === 'running').map(workflow => (
+                <WorkflowCard key={workflow.id} workflow={workflow} />
+              ))}
+            </div>
+          </TabsContent>
+          
+          <TabsContent value="scheduled" className="mt-0">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              {workflows.filter(w => w.status === 'scheduled').map(workflow => (
+                <WorkflowCard key={workflow.id} workflow={workflow} />
+              ))}
+            </div>
+          </TabsContent>
+          
+          <TabsContent value="completed" className="mt-0">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              {workflows.filter(w => w.status === 'success').map(workflow => (
+                <WorkflowCard key={workflow.id} workflow={workflow} />
+              ))}
+            </div>
+          </TabsContent>
+          
+          <TabsContent value="failed" className="mt-0">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              {workflows.filter(w => w.status === 'failed').map(workflow => (
+                <WorkflowCard key={workflow.id} workflow={workflow} />
+              ))}
+            </div>
+          </TabsContent>
+        </Tabs>
       </div>
-    </SidebarWrapper>
+    </div>
   );
 };
 
